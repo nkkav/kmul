@@ -13,41 +13,45 @@
 +-------------------+----------------------------------------------------------+
 | **Website**       | http://www.nkavvadias.com                                |
 +-------------------+----------------------------------------------------------+
-| **Release Date**  | 13 June 2014                                             |
+| **Release Date**  | 16 October 2014                                          |
 +-------------------+----------------------------------------------------------+
-| **Version**       | 0.0.7                                                    |
+| **Version**       | 0.1.0                                                    |
 +-------------------+----------------------------------------------------------+
 | **Rev. history**  |                                                          |
 +-------------------+----------------------------------------------------------+
-|        **v0.0.1** | 07-06-2011                                               |
+|        **v0.1.0** | 2014-10-16                                               |
 |                   |                                                          |
-|                   | Initial release.                                         |
+|                   | Documentation updates and fixes.                         |
 +-------------------+----------------------------------------------------------+
-|        **v0.0.2** | 20-11-2011                                               |
+|        **v0.0.7** | 2014-06-13                                               |
 |                   |                                                          |
-|                   | Minor README, Makefile updates.                          |
+|                   | Changed README to README.rst.                            |
 +-------------------+----------------------------------------------------------+
-|        **v0.0.3** | 03-12-2011                                               |
-|                   |                                                          |
-|                   | Minor README updates regarding multiple releases,        |
-|                   | tutorial usage.                                          |
-+-------------------+----------------------------------------------------------+
-|        **v0.0.4** | 17-03-2012                                               |
-|                   |                                                          |
-|                   | Split build-and-test scripts to "build" and "test".      |
-+-------------------+----------------------------------------------------------+
-|        **v0.0.5** | 28-04-2013                                               |
-|                   |                                                          |
-|                   | Converted documentation to RestructuredText.             |
-+-------------------+----------------------------------------------------------+
-|        **v0.0.6** | 12-06-2014                                               |
+|        **v0.0.6** | 2014-06-12                                               |
 |                   |                                                          |
 |                   | Updated contact information. Replaced COPYING.BSD by     |
 |                   | LICENSE.                                                 |
 +-------------------+----------------------------------------------------------+
-|        **v0.0.7** | 13-06-2014                                               |
+|        **v0.0.5** | 2013-04-28                                               |
 |                   |                                                          |
-|                   | Changed README to README.rst.                            |
+|                   | Converted documentation to RestructuredText.             |
++-------------------+----------------------------------------------------------+
+|        **v0.0.4** | 2012-03-17                                               |
+|                   |                                                          |
+|                   | Split build-and-test scripts to "build" and "test".      |
++-------------------+----------------------------------------------------------+
+|        **v0.0.3** | 2011-12-03                                               |
+|                   |                                                          |
+|                   | Minor README updates regarding multiple releases,        |
+|                   | tutorial usage.                                          |
++-------------------+----------------------------------------------------------+
+|        **v0.0.2** | 2011-11-20                                               |
+|                   |                                                          |
+|                   | Minor README, Makefile updates.                          |
++-------------------+----------------------------------------------------------+
+|        **v0.0.1** | 2011-06-07                                               |
+|                   |                                                          |
+|                   | Initial release.                                         |
 +-------------------+----------------------------------------------------------+
 
 .. _Link: http://to-be-determined
@@ -56,7 +60,7 @@
 1. Introduction
 ===============
 
-"kmul" is a generator of routines for optimized multiplication by an integer 
+``kmul`` is a generator of routines for optimized multiplication by an integer 
 constant. In order to calculate a constant integer multiplication, it uses the 
 public domain routines presented in the work:
 Preston Briggs and Tim Harvey, "Multiplication by integer constants," Technical 
@@ -65,42 +69,41 @@ This technical report implements Bernstein's algorithm documented in:
 R. Bernstein, "Multiplication by integer constants," Software - Practice and 
 Experience, Vol. 16, No. 7, pp. 641-652, July 1986.
 
-"kmul" can also be used for emitting a NAC (generic assembly language) or ANSI 
+``kmul`` can also be used for emitting a NAC (generic assembly language) or ANSI 
 C implementation of the multiplication.
 
 
 2. File listing
 ===============
 
-The kmul distribution includes the following files. Files denoted by a 
-capital S are not available in binary releases of kmul:
+The ``kmul`` distribution includes the following files:
 
 +---------------------+--------------------------------------------------------+
 | /kmul               | Top-level directory                                    |
 +---------------------+--------------------------------------------------------+
-|   **S** build.sh    | Build script for kmul (source only).                   |
+| build.sh            | Build script for ``kmul``.                             |
 +---------------------+--------------------------------------------------------+
-|   **S** LICENSE     | Description of the Modified BSD license.               |
+| LICENSE             | Description of the Modified BSD license.               |
 +---------------------+--------------------------------------------------------+
-|   **S** kmul.c      | The source code for the application.                   |
+| kmul.c              | The source code for the application.                   |
 +---------------------+--------------------------------------------------------+
-|   kmul.exe          | Windows or Linux executable for the application.       |
+| kmul.exe            | Windows or Linux executable for the application.       |
 +---------------------+--------------------------------------------------------+
-|   **S** Makefile    | Makefile for generating the kmul executable.           |
+| Makefile            | Makefile for generating the ``kmul`` executable.       |
 +---------------------+--------------------------------------------------------+
-|   README.html       | HTML version of README.rst.                            |
+| README.html         | HTML version of README.rst.                            |
 +---------------------+--------------------------------------------------------+
-|   README.pdf        | PDF version of README.rst.                             |
+| README.pdf          | PDF version of README.rst.                             |
 +---------------------+--------------------------------------------------------+
-|   README.rst        | This file.                                             |
+| README.rst          | This file.                                             |
 +---------------------+--------------------------------------------------------+
-|   test.c            | Sample test file.                                      |
+| test.c              | Sample test file.                                      |
 +---------------------+--------------------------------------------------------+
-|   test.opt.c        | Expected optimized version of test.c.                  |
+| test.opt.c          | Expected optimized version of ``test.c``.              |
 +---------------------+--------------------------------------------------------+
-|   test.sh           | Perform some sample runs.                              |
+| test.sh             | Perform some sample runs.                              |
 +---------------------+--------------------------------------------------------+
-|   test2.sh          | Another test script to perform more sample runs.       |
+| test2.sh            | Another test script to perform more sample runs.       |
 +---------------------+--------------------------------------------------------+
 
 
@@ -111,8 +114,8 @@ There exists a quite portable Makefile (``Makefile`` in the current directory).
 Running ``make`` from the command prompt should compile ``kmul``.
 
 
-4. Prerequisities
-=================
+4. Prerequisites
+================
 
 - [mandatory for building] Standard UNIX-based tools
 - gcc (tested with gcc-3.4.4 on cygwin/x86)
@@ -133,7 +136,7 @@ ANSI C routines are emitted only for a width of 32-bits (see option below).
   
 ``kmul`` can be invoked as:
 
-| ``$./kmul [options]``
+| ``$ ./kmul [options]``
 
 The complete ``kmul`` options listing:
   
@@ -276,7 +279,7 @@ In order to build and run a series of sample tests do the following:
 
 or for a more extensive set of tests:
 
-| ``$./test2.sh``
+| ``$ ./test2.sh``
 
 
 8. Contact

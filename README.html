@@ -362,56 +362,61 @@ ul.auto-toc {
 <td><a class="reference external" href="http://www.nkavvadias.com">http://www.nkavvadias.com</a></td>
 </tr>
 <tr><td><strong>Release Date</strong></td>
-<td>13 June 2014</td>
+<td>16 October 2014</td>
 </tr>
 <tr><td><strong>Version</strong></td>
-<td>0.0.7</td>
+<td>0.1.0</td>
 </tr>
 <tr><td><strong>Rev. history</strong></td>
 <td>&nbsp;</td>
 </tr>
-<tr><td><strong>v0.0.1</strong></td>
-<td><p class="first">07-06-2011</p>
-<p class="last">Initial release.</p>
+<tr><td><strong>v0.1.0</strong></td>
+<td><p class="first">2014-10-16</p>
+<p class="last">Documentation updates and fixes.</p>
 </td>
 </tr>
-<tr><td><strong>v0.0.2</strong></td>
-<td><p class="first">20-11-2011</p>
-<p class="last">Minor README, Makefile updates.</p>
-</td>
-</tr>
-<tr><td><strong>v0.0.3</strong></td>
-<td><p class="first">03-12-2011</p>
-<p class="last">Minor README updates regarding multiple releases,
-tutorial usage.</p>
-</td>
-</tr>
-<tr><td><strong>v0.0.4</strong></td>
-<td><p class="first">17-03-2012</p>
-<p class="last">Split build-and-test scripts to &quot;build&quot; and &quot;test&quot;.</p>
-</td>
-</tr>
-<tr><td><strong>v0.0.5</strong></td>
-<td><p class="first">28-04-2013</p>
-<p class="last">Converted documentation to RestructuredText.</p>
+<tr><td><strong>v0.0.7</strong></td>
+<td><p class="first">2014-06-13</p>
+<p class="last">Changed README to README.rst.</p>
 </td>
 </tr>
 <tr><td><strong>v0.0.6</strong></td>
-<td><p class="first">12-06-2014</p>
+<td><p class="first">2014-06-12</p>
 <p class="last">Updated contact information. Replaced COPYING.BSD by
 LICENSE.</p>
 </td>
 </tr>
-<tr><td><strong>v0.0.7</strong></td>
-<td><p class="first">13-06-2014</p>
-<p class="last">Changed README to README.rst.</p>
+<tr><td><strong>v0.0.5</strong></td>
+<td><p class="first">2013-04-28</p>
+<p class="last">Converted documentation to RestructuredText.</p>
+</td>
+</tr>
+<tr><td><strong>v0.0.4</strong></td>
+<td><p class="first">2012-03-17</p>
+<p class="last">Split build-and-test scripts to &quot;build&quot; and &quot;test&quot;.</p>
+</td>
+</tr>
+<tr><td><strong>v0.0.3</strong></td>
+<td><p class="first">2011-12-03</p>
+<p class="last">Minor README updates regarding multiple releases,
+tutorial usage.</p>
+</td>
+</tr>
+<tr><td><strong>v0.0.2</strong></td>
+<td><p class="first">2011-11-20</p>
+<p class="last">Minor README, Makefile updates.</p>
+</td>
+</tr>
+<tr><td><strong>v0.0.1</strong></td>
+<td><p class="first">2011-06-07</p>
+<p class="last">Initial release.</p>
 </td>
 </tr>
 </tbody>
 </table>
 <div class="section" id="introduction">
 <h1>1. Introduction</h1>
-<p>&quot;kmul&quot; is a generator of routines for optimized multiplication by an integer
+<p><tt class="docutils literal">kmul</tt> is a generator of routines for optimized multiplication by an integer
 constant. In order to calculate a constant integer multiplication, it uses the
 public domain routines presented in the work:
 Preston Briggs and Tim Harvey, &quot;Multiplication by integer constants,&quot; Technical
@@ -419,13 +424,12 @@ report, Rice University, July 1994.
 This technical report implements Bernstein's algorithm documented in:
 R. Bernstein, &quot;Multiplication by integer constants,&quot; Software - Practice and
 Experience, Vol. 16, No. 7, pp. 641-652, July 1986.</p>
-<p>&quot;kmul&quot; can also be used for emitting a NAC (generic assembly language) or ANSI
+<p><tt class="docutils literal">kmul</tt> can also be used for emitting a NAC (generic assembly language) or ANSI
 C implementation of the multiplication.</p>
 </div>
 <div class="section" id="file-listing">
 <h1>2. File listing</h1>
-<p>The kmul distribution includes the following files. Files denoted by a
-capital S are not available in binary releases of kmul:</p>
+<p>The <tt class="docutils literal">kmul</tt> distribution includes the following files:</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="27%" />
@@ -435,20 +439,20 @@ capital S are not available in binary releases of kmul:</p>
 <tr><td>/kmul</td>
 <td>Top-level directory</td>
 </tr>
-<tr><td><strong>S</strong> build.sh</td>
-<td>Build script for kmul (source only).</td>
+<tr><td>build.sh</td>
+<td>Build script for <tt class="docutils literal">kmul</tt>.</td>
 </tr>
-<tr><td><strong>S</strong> LICENSE</td>
+<tr><td>LICENSE</td>
 <td>Description of the Modified BSD license.</td>
 </tr>
-<tr><td><strong>S</strong> kmul.c</td>
+<tr><td>kmul.c</td>
 <td>The source code for the application.</td>
 </tr>
 <tr><td>kmul.exe</td>
 <td>Windows or Linux executable for the application.</td>
 </tr>
-<tr><td><strong>S</strong> Makefile</td>
-<td>Makefile for generating the kmul executable.</td>
+<tr><td>Makefile</td>
+<td>Makefile for generating the <tt class="docutils literal">kmul</tt> executable.</td>
 </tr>
 <tr><td>README.html</td>
 <td>HTML version of README.rst.</td>
@@ -463,7 +467,7 @@ capital S are not available in binary releases of kmul:</p>
 <td>Sample test file.</td>
 </tr>
 <tr><td>test.opt.c</td>
-<td>Expected optimized version of test.c.</td>
+<td>Expected optimized version of <tt class="docutils literal">test.c</tt>.</td>
 </tr>
 <tr><td>test.sh</td>
 <td>Perform some sample runs.</td>
@@ -479,8 +483,8 @@ capital S are not available in binary releases of kmul:</p>
 <p>There exists a quite portable Makefile (<tt class="docutils literal">Makefile</tt> in the current directory).
 Running <tt class="docutils literal">make</tt> from the command prompt should compile <tt class="docutils literal">kmul</tt>.</p>
 </div>
-<div class="section" id="prerequisities">
-<h1>4. Prerequisities</h1>
+<div class="section" id="prerequisites">
+<h1>4. Prerequisites</h1>
 <ul class="simple">
 <li>[mandatory for building] Standard UNIX-based tools</li>
 <li>gcc (tested with gcc-3.4.4 on cygwin/x86)</li>
@@ -499,7 +503,7 @@ listing below). The usual tasks that can be accomplished with <tt class="docutil
 <p>ANSI C routines are emitted only for a width of 32-bits (see option below).</p>
 <p><tt class="docutils literal">kmul</tt> can be invoked as:</p>
 <div class="line-block">
-<div class="line"><tt class="docutils literal"><span class="pre">$./kmul</span> [options]</tt></div>
+<div class="line"><tt class="docutils literal">$ ./kmul [options]</tt></div>
 </div>
 <p>The complete <tt class="docutils literal">kmul</tt> options listing:</p>
 <dl class="docutils">
@@ -633,7 +637,7 @@ int main(int argc, char *argv[]) {
 </div>
 <p>or for a more extensive set of tests:</p>
 <div class="line-block">
-<div class="line"><tt class="docutils literal"><span class="pre">$./test2.sh</span></tt></div>
+<div class="line"><tt class="docutils literal">$ ./test2.sh</tt></div>
 </div>
 </div>
 <div class="section" id="contact">
