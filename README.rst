@@ -291,14 +291,3 @@ or for a more extensive set of tests:
 
 | ``$ ./test2.sh``
 
-
-8. Contact
-==========
-
-You may contact me for further questions/suggestions/corrections at:
-
-|  Nikolaos Kavvadias <nikos@nkavvadias.com>
-|                     <nikolaos.kavvadias@gmail.com>
-|  http://www.nkavvadias.com
-|  Independent Consultant
-|  Lamia, Fthiotis, Greece
