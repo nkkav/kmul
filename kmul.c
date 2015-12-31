@@ -9,7 +9,7 @@
  *              July 13, 1994
  * Author     : Nikolaos Kavvadias <nikolaos.kavvadias@gmail.com>                
  * Copyright  : (C) Nikolaos Kavvadias 2006, 2007, 2008, 2009, 2010, 2011, 2012, 
- *              2013, 2014, 2015                
+ *              2013, 2014, 2015, 2016                
  * Website    : http://www.nkavvadias.com                            
  *                                                                          
  * This file is part of kmul, and is distributed under the terms of the  
