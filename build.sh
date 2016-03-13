@@ -3,6 +3,7 @@
 rm -rf kmul*.nac kmulu*.c kmuls*.c
 make clean
 make
+make tidy
 
 if [ "$SECONDS" -eq 1 ]
 then
