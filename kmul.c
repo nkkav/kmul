@@ -491,16 +491,8 @@ void emit_kmul_nac(FILE *f, int m, int s, unsigned int W)
     multiply((int)m); 
   }
   
-  if (m > 0)
-  {
-    pfprintf(f, 0, "procedure kmul_%c%d_p_%d (in %c%d x, out %c%d y)\n", 
-      c, W, ABS(m), c, W, c, W);
-  }
-  else
-  {
-    pfprintf(f, 0, "procedure kmul_%c%d_m_%d (in %c%d x, out %c%d y)\n", 
-      c, W, ABS(m), c, W, c, W);
-  }
+  pfprintf(f, 0, "procedure kmul_%c%d_%c_%d (in %c%d x, out %c%d y)\n", 
+      c, W, ((m > 0) ? 'p' : 'm'), ABS(m), c, W, c, W);
   pfprintf(f, 0, "{\n");   
   if (m == 0)
   {
@@ -568,14 +560,7 @@ void emit_kmul_ansic(FILE *f, int m, int s, unsigned int W)
     multiply((int)m); 
   }
   
-  if (m > 0)
-  {
-    pfprintf(f, 0, "%s kmul_%c%d_p_%d (%s x)\n", dt, c, W, ABS(m), dt);
-  }
-  else
-  {
-    pfprintf(f, 0, "%s kmul_%c%d_m_%d (%s x)\n", dt, c, W, ABS(m), dt);
-  }
+  pfprintf(f, 0, "%s kmul_%c%d_%c_%d (%s x)\n", dt, c, W, ((m > 0) ? 'p' : 'm'), ABS(m), dt);
   pfprintf(f, 0, "{\n");   
   if (m == 0)
   {
@@ -625,7 +610,7 @@ static void print_usage()
 {
   printf("\n");
   printf("* Usage:\n");
-  printf("* kmul [options]\n");
+  printf("* ./kmul.exe [options]\n");
   printf("* \n");
   printf("* Options:\n");
   printf("* \n");
