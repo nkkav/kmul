@@ -475,14 +475,7 @@ void emit_kmul_nac(FILE *f, int m, int s, unsigned int W)
 { 
   int i;  
   char c = ((s) ? 's' : 'u');
-  
-  count = 0;
-  if (m != 0)
-  {
-    init_multiply();
-    multiply((int)m); 
-  }
-  
+   
   pfprintf(f, 0, "procedure kmul_%c%d_%c_%d (in %c%d x, out %c%d y)\n", 
       c, W, ((m > 0) ? 'p' : 'm'), ABS(m), c, W, c, W);
   pfprintf(f, 0, "{\n");   
@@ -544,14 +537,7 @@ void emit_kmul_ansic(FILE *f, int m, int s, unsigned int W)
   {
     strcpy(dt, "unsigned int");
   }  
-
-  count = 0;  
-  if (m != 0)
-  {
-    init_multiply();
-    multiply((int)m); 
-  }
-  
+ 
   pfprintf(f, 0, "%s kmul_%c%d_%c_%d (%s x)\n", dt, c, W, ((m > 0) ? 'p' : 'm'), ABS(m), dt);
   pfprintf(f, 0, "{\n");   
   if (m == 0)
