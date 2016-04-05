@@ -643,9 +643,16 @@ int main(int argc, char *argv[])
 {
    int i;
    char *fout_name, suffix[4], ch='X', datatype[8];
-   
+
+   // If no arguments are passed, exit with help
+   if (argc == 1)
+   {
+     print_usage();
+     exit(1);
+   }
+  
   // Read input arguments
-  for (i=1; i < argc; i++)
+  for (i = 1; i < argc; i++)
   {
     if (strcmp("-h", argv[i]) == 0)
     {
