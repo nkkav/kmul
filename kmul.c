@@ -289,11 +289,9 @@ static int emit_code(FILE *f, Node *node)
   {
     // Opcode cases <13c>
     case IDENTITY:
-      dprintf(enable_debug, stdout, "Info: Did an IDENTITY.\n");
       break;
     // Opcode cases <13d>
     case NEGATE:
-      dprintf(enable_debug, stdout, "Info: Did a NEGATE.\n");
       source = emit_code(f, node->parent);
       dprintf(enable_debug, stdout, "Info: %d = 0 - %d\n", target, source);
       if (enable_nac == 1 && enable_print == 1)
@@ -308,7 +306,6 @@ static int emit_code(FILE *f, Node *node)
       break;
     // Opcode cases <14a>
     case SHIFT_ADD:
-      dprintf(enable_debug, stdout, "Info: Did a SHIFT_ADD.\n");
       source = emit_code(f, node->parent);
       emit_shift(f, target-1, source);
       dprintf(enable_debug, stdout, "Info: %d = %d + 1\n", target, target-1);
@@ -324,7 +321,6 @@ static int emit_code(FILE *f, Node *node)
       break;
     // Opcode cases <14b>
     case SHIFT_SUB:
-      dprintf(enable_debug, stdout, "Info: Did a SHIFT_SUB.\n");
       source = emit_code(f, node->parent);
       emit_shift(f, target+1, source);
       dprintf(enable_debug, stdout, "Info: %d = %d - 1\n", target, target+1);
@@ -340,7 +336,6 @@ static int emit_code(FILE *f, Node *node)
       break;
     // Opcode cases <14c>
     case SHIFT_REV:
-      dprintf(enable_debug, stdout, "Info: Did a SHIFT_REV.\n");
       source = emit_code(f, node->parent);
       emit_shift(f, 1-target, source);
       dprintf(enable_debug, stdout, "Info: %d = 1 - %d\n", target, 1-target);
@@ -356,7 +351,6 @@ static int emit_code(FILE *f, Node *node)
       break;
     // Opcode cases <14d>
     case FACTOR_ADD:
-      dprintf(enable_debug, stdout, "Info: Did a FACTOR_ADD.\n");
       source = emit_code(f, node->parent);
       emit_shift(f, target-source, source);
       dprintf(enable_debug, stdout, "Info: %d = %d + %d\n", target, target-source, source);
@@ -372,7 +366,6 @@ static int emit_code(FILE *f, Node *node)
       break;
     // Opcode cases <14e>
     case FACTOR_SUB:
-      dprintf(enable_debug, stdout, "Info: Did a FACTOR_SUB.\n");
       source = emit_code(f, node->parent);
       emit_shift(f, target+source, source);
       dprintf(enable_debug, stdout, "Info: %d = %d - %d\n", target, target+source, source);
@@ -388,7 +381,6 @@ static int emit_code(FILE *f, Node *node)
       break;
     // Opcode cases <15a>
     case FACTOR_REV:
-      dprintf(enable_debug, stdout, "Info: Did a FACTOR_REV.\n");
       source = emit_code(f, node->parent);
       emit_shift(f, source-target, source);
       dprintf(enable_debug, stdout, "Info: %d = %d - %d\n", target, source, source-target);
