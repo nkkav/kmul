@@ -709,7 +709,7 @@ int main(int argc, char *argv[])
   }
   ch = (is_signed == 0) ? 'u' : 's';
   sprintf(datatype, "%c%d", ch, width_val);
-  if (multiplier_val > 0)
+  if (multiplier_val >= 0)
   {
     sprintf(fout_name, "kmul_%s_p_%d.%s", datatype, multiplier_val, suffix);
   }
