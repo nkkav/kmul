@@ -85,7 +85,7 @@ static Node *find_sequence(int c, double limit);
 
 int multiplier_val=1, width_val=32, lo_val=0, hi_val=65535;
 int enable_debug=0, enable_errors=0;
-int enable_signed=0, enable_unsigned=1;
+int is_signed=0;
 int enable_nac=1, enable_ansic=0, enable_print=0;
 FILE *fout;
 
@@ -643,13 +643,11 @@ int main(int argc, char *argv[])
     }
     else if (strcmp("-unsigned", argv[i]) == 0)
     {
-      enable_unsigned = 1;
-      enable_signed   = 0;
+      is_signed = 0;
     }
     else if (strcmp("-signed", argv[i]) == 0)
     {
-      enable_unsigned = 0;
-      enable_signed   = 1;
+      is_signed = 1;
     }
     else if (strcmp("-nac", argv[i]) == 0)
     {
@@ -694,7 +692,7 @@ int main(int argc, char *argv[])
     }
   }
   
-  if ((enable_unsigned == 1) && (multiplier_val < 0))
+  if ((is_signed == 0) && (multiplier_val < 0))
   {
     fprintf(stderr, "Error: Multiplier must be positive for unsigned multiplication.\n");
     exit(1);
@@ -709,14 +707,7 @@ int main(int argc, char *argv[])
   {
     strcpy(suffix, "c");
   }
-  if (enable_unsigned == 1)
-  {
-    ch = 'u';
-  }
-  else if (enable_signed == 1)
-  {
-    ch = 's';
-  }
+  ch = (is_signed == 0) ? 'u' : 's';
   sprintf(datatype, "%c%d", ch, width_val);
   if (multiplier_val > 0)
   {
@@ -728,29 +719,17 @@ int main(int argc, char *argv[])
   }
   fout = fopen(fout_name, "w");
 
-  if (enable_unsigned == 1)
+  if (enable_nac == 1)
   {
-    if (enable_nac == 1)
-    {
-      emit_kmul_nac(fout, multiplier_val, !enable_unsigned, width_val);
-    }
-    else if (enable_ansic == 1)
-    {
-      emit_kmul_ansic(fout, multiplier_val, !enable_unsigned, width_val);
-    }
+    emit_kmul_nac(fout, multiplier_val, is_signed, width_val);
   }
-  else if (enable_signed == 1)
+  else if (enable_ansic == 1)
   {
-    if (enable_nac == 1)
-    {
-      emit_kmul_nac(fout, multiplier_val, enable_signed, width_val);
-    }
-    else if (enable_ansic == 1)
-    {
-      emit_kmul_ansic(fout, multiplier_val, enable_signed, width_val);
-    }
-  }       
+    emit_kmul_ansic(fout, multiplier_val, is_signed, width_val);
+  }
+
   free(fout_name);
   fclose(fout);
+
   return 0;
 }
