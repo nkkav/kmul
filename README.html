@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.11: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.12: http://docutils.sourceforge.net/" />
 <title>kmul user manual</title>
 <style type="text/css">
 
@@ -363,13 +363,19 @@ ul.auto-toc {
 <td><a class="reference external" href="http://www.nkavvadias.com">http://www.nkavvadias.com</a></td>
 </tr>
 <tr><td><strong>Release Date</strong></td>
-<td>29 November 2014</td>
+<td>12 April 2016</td>
 </tr>
 <tr><td><strong>Version</strong></td>
 <td>0.1.1</td>
 </tr>
 <tr><td><strong>Rev. history</strong></td>
 <td>&nbsp;</td>
+</tr>
+<tr><td><strong>v0.1.2</strong></td>
+<td><p class="first">2016-04-12</p>
+<p class="last">Cumulative update; flag management cleanup, cleanup
+scripts.</p>
+</td>
 </tr>
 <tr><td><strong>v0.1.1</strong></td>
 <td><p class="first">2014-11-29</p>
@@ -462,6 +468,12 @@ C implementation of the multiplication.</p>
 </tr>
 <tr><td>build.sh</td>
 <td>Build script for <tt class="docutils literal">kmul</tt>.</td>
+</tr>
+<tr><td>clean.sh</td>
+<td>Clean the files produced from <tt class="docutils literal">test.sh</tt>.</td>
+</tr>
+<tr><td>clean2.sh</td>
+<td>Clean the files produced from <tt class="docutils literal">test2.sh</tt>.</td>
 </tr>
 <tr><td>kmul.c</td>
 <td>The source code for the application.</td>
@@ -648,6 +660,15 @@ int main(int argc, char *argv[]) {
 <div class="line-block">
 <div class="line"><tt class="docutils literal">$ ./test2.sh</tt></div>
 </div>
+<p>To clean-up the produced files and only these use:</p>
+<div class="line-block">
+<div class="line"><tt class="docutils literal">$ ./clean.sh</tt></div>
+</div>
+<p>or</p>
+<div class="line-block">
+<div class="line"><tt class="docutils literal">$ ./clean2.sh</tt></div>
+</div>
+<p>for <tt class="docutils literal">test.sh</tt> and <tt class="docutils literal">test2.sh</tt>, correspondingly.</p>
 </div>
 </div>
 </body>
