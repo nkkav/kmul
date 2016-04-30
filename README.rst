@@ -19,7 +19,7 @@
 +-------------------+----------------------------------------------------------+
 | **Release Date**  | 12 April 2016                                            |
 +-------------------+----------------------------------------------------------+
-| **Version**       | 0.1.1                                                    |
+| **Version**       | 0.1.2                                                    |
 +-------------------+----------------------------------------------------------+
 | **Rev. history**  |                                                          |
 +-------------------+----------------------------------------------------------+
@@ -186,15 +186,15 @@ The complete ``kmul`` options listing:
 
 Here follow some simple usage examples of ``kmul``.
 
-1. Generate the ANSI C implementation of n*11 optimized routine.
+1. Generate the ANSI C implementation of the optimized routine for ``n * 11``.
 
 | ``$ ./kmul -mul 11 -width 32 -unsigned -ansic``
   
-2. Generate the NAC implementation of n*(-7) optimized routine.
+2. Generate the NAC implementation of the optimized routine for ``n * (-7)``.
 
 | ``$ ./kmul -mul -7 -width 32 -signed -ansic``
   
-3. Generate the ANSI C implementation of n*23 optimized routine  
+3. Generate the ANSI C implementation of the optimized routine for ``n * 23``  
    with debugging output.
 
 | ``$ ./kmul -mul 23 -width 32 -unsigned -ansic -d``
