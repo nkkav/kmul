@@ -1,7 +1,8 @@
 #!/bin/bash
 
-absval=
+#absval=
 
+# Advanced Bash Scripting Guide, p. 699
 abs ()
 {
   if [ "$1" -lt 0 ]
@@ -29,10 +30,18 @@ done
 # Clean the produced files from testing signed multiplications
 for ((muls=${LOLIMIT2} ; muls <= ${HILIMIT2} ; muls++))
 do
-  $(abs $muls)
+  abs $muls
   rm -rf kmul_s32_m_${absval}.nac 
   rm -rf kmul_s32_m_${absval}.c
+  rm -rf kmul_s32_p_${absval}.nac 
+  rm -rf kmul_s32_p_${absval}.c
 done
 
+if [ "$SECONDS" -eq 1 ]
+then
+  units=second
+else
+  units=seconds
+fi
+echo "This script has been running for $SECONDS $units."
 exit 0
-
