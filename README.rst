@@ -17,11 +17,16 @@
 +-------------------+----------------------------------------------------------+
 | **Website**       | http://www.nkavvadias.com                                |
 +-------------------+----------------------------------------------------------+
-| **Release Date**  | 12 April 2016                                            |
+| **Release Date**  | 29 July 2016                                             |
 +-------------------+----------------------------------------------------------+
-| **Version**       | 0.1.2                                                    |
+| **Version**       | 0.1.3                                                    |
 +-------------------+----------------------------------------------------------+
 | **Rev. history**  |                                                          |
++-------------------+----------------------------------------------------------+
+|        **v0.1.3** | 2016-07-29                                               |
+|                   |                                                          |
+|                   | Add support for C99 data types, fix support for ANSI C   |
+|                   | ones.                                                    |
 +-------------------+----------------------------------------------------------+
 |        **v0.1.2** | 2016-04-12                                               |
 |                   |                                                          |
@@ -136,9 +141,8 @@ Running ``make`` from the command prompt should compile ``kmul``.
 4. Prerequisites
 ================
 
-- [mandatory for building] Standard UNIX-based tools
-- gcc (tested with gcc-3.4.4 on cygwin/x86)
-- make
+- [mandatory for building] Standard UNIX-based tools (make)
+- gcc (tested with gcc-3.4.4+ on cygwin/x86 gcc-4.6 to gcc-5.3.1 on linux/x64)
 - bash
 
 
@@ -155,7 +159,7 @@ ANSI C routines are emitted only for a width of 32-bits (see option below).
   
 ``kmul`` can be invoked as:
 
-| ``$ ./kmul [options]``
+| ``$ ./kmul.exe [options]``
 
 The complete ``kmul`` options listing:
   
@@ -182,22 +186,30 @@ The complete ``kmul`` options listing:
   Emit software routine in the NAC general assembly language (default).
   
 **-ansic**
-  Emit software routine in ANSI C (only for ``width=32``).
+  Emit software routine in ANSI C (for widths up to 64 bits).
+
+**-c99**
+  Emit software routine in C99 (for widths up to 64 bits).
 
 Here follow some simple usage examples of ``kmul``.
 
 1. Generate the ANSI C implementation of the optimized routine for ``n * 11``.
 
-| ``$ ./kmul -mul 11 -width 32 -unsigned -ansic``
+| ``$ ./kmul.exe -mul 11 -width 32 -unsigned -ansic``
   
 2. Generate the NAC implementation of the optimized routine for ``n * (-7)``.
 
-| ``$ ./kmul -mul -7 -width 32 -signed -ansic``
+| ``$ ./kmul.exe -mul -7 -width 32 -signed -ansic``
   
 3. Generate the ANSI C implementation of the optimized routine for ``n * 23``  
    with debugging output.
 
-| ``$ ./kmul -mul 23 -width 32 -unsigned -ansic -d``
+| ``$ ./kmul.exe -mul 23 -width 32 -unsigned -ansic -d``
+
+4. Generate the C99 implementation of the optimized routine for the signed 
+   ``n * 23`` multiplication and for a data width of 17 bits.
+
+| ``$ ./kmul.exe -mul 23 -width 17 -signed -c99``
 
   
 6. Quick tutorial
@@ -243,25 +255,26 @@ routine. The resulting optimized source file should be as follows:
   // test.opt.c
   #include <stdio.h>
   #include <stdlib.h>
-  signed int kmul_s32_p_23 (signed int x)
+
+  long kmul_s32_p_23 (long x)
   {
-    signed int t0;
-    signed int t1;
-    signed int t2;
-    signed int t3;
-    signed int t4;
-    signed int t5;
-    signed int t6;
-    signed int t7;
-    signed int t8;
-    signed int t9;
-    signed int t10;
-    signed int t11;
-    signed int t12;
-    signed int t13;
-    signed int t14;
-    signed int t15;
-    signed int y;
+    long t0;
+    long t1;
+    long t2;
+    long t3;
+    long t4;
+    long t5;
+    long t6;
+    long t7;
+    long t8;
+    long t9;
+    long t10;
+    long t11;
+    long t12;
+    long t13;
+    long t14;
+    long t15;
+    long y;
     t0 = x;
     t1 = t0 << 1;
     t2 = t1 + x;
@@ -271,7 +284,8 @@ routine. The resulting optimized source file should be as follows:
     return (y);
   }
 
-  int main(int argc, char *argv[]) {
+  int main(int argc, char *argv[]) 
+  {
     int a, b;
     a = atoi(argv[1]);
     b = kmul_s32_p_23(a);

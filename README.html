@@ -363,13 +363,19 @@ ul.auto-toc {
 <td><a class="reference external" href="http://www.nkavvadias.com">http://www.nkavvadias.com</a></td>
 </tr>
 <tr><td><strong>Release Date</strong></td>
-<td>12 April 2016</td>
+<td>29 July 2016</td>
 </tr>
 <tr><td><strong>Version</strong></td>
-<td>0.1.2</td>
+<td>0.1.3</td>
 </tr>
 <tr><td><strong>Rev. history</strong></td>
 <td>&nbsp;</td>
+</tr>
+<tr><td><strong>v0.1.3</strong></td>
+<td><p class="first">2016-07-29</p>
+<p class="last">Add support for C99 data types, fix support for ANSI C
+ones.</p>
+</td>
 </tr>
 <tr><td><strong>v0.1.2</strong></td>
 <td><p class="first">2016-04-12</p>
@@ -507,9 +513,8 @@ Running <tt class="docutils literal">make</tt> from the command prompt should co
 <div class="section" id="prerequisites">
 <h1>4. Prerequisites</h1>
 <ul class="simple">
-<li>[mandatory for building] Standard UNIX-based tools</li>
-<li>gcc (tested with gcc-3.4.4 on cygwin/x86)</li>
-<li>make</li>
+<li>[mandatory for building] Standard UNIX-based tools (make)</li>
+<li>gcc (tested with gcc-3.4.4+ on cygwin/x86 gcc-4.6 to gcc-5.3.1 on linux/x64)</li>
 <li>bash</li>
 </ul>
 </div>
@@ -524,7 +529,7 @@ listing below). The usual tasks that can be accomplished with <tt class="docutil
 <p>ANSI C routines are emitted only for a width of 32-bits (see option below).</p>
 <p><tt class="docutils literal">kmul</tt> can be invoked as:</p>
 <div class="line-block">
-<div class="line"><tt class="docutils literal">$ ./kmul [options]</tt></div>
+<div class="line"><tt class="docutils literal">$ ./kmul.exe [options]</tt></div>
 </div>
 <p>The complete <tt class="docutils literal">kmul</tt> options listing:</p>
 <dl class="docutils">
@@ -544,27 +549,36 @@ Default: 32.</dd>
 <dt><strong>-nac</strong></dt>
 <dd>Emit software routine in the NAC general assembly language (default).</dd>
 <dt><strong>-ansic</strong></dt>
-<dd>Emit software routine in ANSI C (only for <tt class="docutils literal">width=32</tt>).</dd>
+<dd>Emit software routine in ANSI C (for widths up to 64 bits).</dd>
+<dt><strong>-c99</strong></dt>
+<dd>Emit software routine in C99 (for widths up to 64 bits).</dd>
 </dl>
 <p>Here follow some simple usage examples of <tt class="docutils literal">kmul</tt>.</p>
 <ol class="arabic simple">
 <li>Generate the ANSI C implementation of the optimized routine for <tt class="docutils literal">n * 11</tt>.</li>
 </ol>
 <div class="line-block">
-<div class="line"><tt class="docutils literal">$ ./kmul <span class="pre">-mul</span> 11 <span class="pre">-width</span> 32 <span class="pre">-unsigned</span> <span class="pre">-ansic</span></tt></div>
+<div class="line"><tt class="docutils literal">$ ./kmul.exe <span class="pre">-mul</span> 11 <span class="pre">-width</span> 32 <span class="pre">-unsigned</span> <span class="pre">-ansic</span></tt></div>
 </div>
 <ol class="arabic simple" start="2">
 <li>Generate the NAC implementation of the optimized routine for <tt class="docutils literal">n * <span class="pre">(-7)</span></tt>.</li>
 </ol>
 <div class="line-block">
-<div class="line"><tt class="docutils literal">$ ./kmul <span class="pre">-mul</span> <span class="pre">-7</span> <span class="pre">-width</span> 32 <span class="pre">-signed</span> <span class="pre">-ansic</span></tt></div>
+<div class="line"><tt class="docutils literal">$ ./kmul.exe <span class="pre">-mul</span> <span class="pre">-7</span> <span class="pre">-width</span> 32 <span class="pre">-signed</span> <span class="pre">-ansic</span></tt></div>
 </div>
 <ol class="arabic simple" start="3">
 <li>Generate the ANSI C implementation of the optimized routine for <tt class="docutils literal">n * 23</tt>
 with debugging output.</li>
 </ol>
 <div class="line-block">
-<div class="line"><tt class="docutils literal">$ ./kmul <span class="pre">-mul</span> 23 <span class="pre">-width</span> 32 <span class="pre">-unsigned</span> <span class="pre">-ansic</span> <span class="pre">-d</span></tt></div>
+<div class="line"><tt class="docutils literal">$ ./kmul.exe <span class="pre">-mul</span> 23 <span class="pre">-width</span> 32 <span class="pre">-unsigned</span> <span class="pre">-ansic</span> <span class="pre">-d</span></tt></div>
+</div>
+<ol class="arabic simple" start="4">
+<li>Generate the C99 implementation of the optimized routine for the signed
+<tt class="docutils literal">n * 23</tt> multiplication and for a data width of 17 bits.</li>
+</ol>
+<div class="line-block">
+<div class="line"><tt class="docutils literal">$ ./kmul.exe <span class="pre">-mul</span> 23 <span class="pre">-width</span> 17 <span class="pre">-signed</span> <span class="pre">-c99</span></tt></div>
 </div>
 </div>
 <div class="section" id="quick-tutorial">
@@ -605,25 +619,26 @@ routine. The resulting optimized source file should be as follows:</p>
 // test.opt.c
 #include &lt;stdio.h&gt;
 #include &lt;stdlib.h&gt;
-signed int kmul_s32_p_23 (signed int x)
+
+long kmul_s32_p_23 (long x)
 {
-  signed int t0;
-  signed int t1;
-  signed int t2;
-  signed int t3;
-  signed int t4;
-  signed int t5;
-  signed int t6;
-  signed int t7;
-  signed int t8;
-  signed int t9;
-  signed int t10;
-  signed int t11;
-  signed int t12;
-  signed int t13;
-  signed int t14;
-  signed int t15;
-  signed int y;
+  long t0;
+  long t1;
+  long t2;
+  long t3;
+  long t4;
+  long t5;
+  long t6;
+  long t7;
+  long t8;
+  long t9;
+  long t10;
+  long t11;
+  long t12;
+  long t13;
+  long t14;
+  long t15;
+  long y;
   t0 = x;
   t1 = t0 &lt;&lt; 1;
   t2 = t1 + x;
@@ -633,7 +648,8 @@ signed int kmul_s32_p_23 (signed int x)
   return (y);
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   int a, b;
   a = atoi(argv[1]);
   b = kmul_s32_p_23(a);

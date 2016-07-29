@@ -86,7 +86,7 @@ static Node *find_sequence(int c, double limit);
 int multiplier_val=1, width_val=32, lo_val=0, hi_val=65535;
 int enable_debug=0, enable_errors=0;
 int is_signed=0;
-int enable_nac=1, enable_ansic=0, enable_print=0;
+int enable_nac=1, enable_ansic=0, enable_c99=0, enable_cany=0, enable_print=0;
 FILE *fout;
 
 // Variable definitions <7b>, ...
@@ -273,7 +273,7 @@ static void emit_shift(FILE *f, int target, int source)
   {
     pfprintf(f, 2, "t%d <= shl t%d, %d;\n", count+1, count, i);   
   }
-  else if (enable_ansic == 1 && enable_print == 1)
+  else if (enable_cany == 1 && enable_print == 1)
   {
     pfprintf(f, 2, "t%d = t%d << %d;\n", count+1, count, i);   
   }      
@@ -298,7 +298,7 @@ static int emit_code(FILE *f, Node *node)
       {
         pfprintf(f, 2, "t%d <= neg t%d;\n", count+1, count);   
       }
-      else if (enable_ansic == 1 && enable_print == 1)
+      else if (enable_cany == 1 && enable_print == 1)
       {
         pfprintf(f, 2, "t%d = -t%d;\n", count+1, count);   
       }
@@ -313,7 +313,7 @@ static int emit_code(FILE *f, Node *node)
       {
         pfprintf(f, 2, "t%d <= add t%d, x;\n", count+1, count);   
       }
-      else if (enable_ansic == 1 && enable_print == 1)
+      else if (enable_cany == 1 && enable_print == 1)
       {
         pfprintf(f, 2, "t%d = t%d + x;\n", count+1, count);   
       }      
@@ -328,7 +328,7 @@ static int emit_code(FILE *f, Node *node)
       {
         pfprintf(f, 2, "t%d <= sub t%d, x;\n", count+1, count);   
       }
-      else if (enable_ansic == 1 && enable_print == 1)
+      else if (enable_cany == 1 && enable_print == 1)
       {
         pfprintf(f, 2, "t%d = t%d - x;\n", count+1, count);   
       }      
@@ -343,7 +343,7 @@ static int emit_code(FILE *f, Node *node)
       {
         pfprintf(f, 2, "t%d <= sub x, t%d;\n", count+1, count);   
       }
-      else if (enable_ansic == 1 && enable_print == 1)
+      else if (enable_cany == 1 && enable_print == 1)
       {
         pfprintf(f, 2, "t%d = x - t%d;\n", count+1, count);   
       }      
@@ -358,7 +358,7 @@ static int emit_code(FILE *f, Node *node)
       {
         pfprintf(f, 2, "t%d <= add t%d, t%d;\n", count+1, count, count-1);   
       }
-      else if (enable_ansic == 1 && enable_print == 1)
+      else if (enable_cany == 1 && enable_print == 1)
       {
         pfprintf(f, 2, "t%d <= t%d + t%d;\n", count+1, count, count-1);   
       }      
@@ -373,7 +373,7 @@ static int emit_code(FILE *f, Node *node)
       {
         pfprintf(f, 2, "t%d <= sub t%d, t%d;\n", count+1, count, count-1);   
       }
-      else if (enable_ansic == 1 && enable_print == 1)
+      else if (enable_cany == 1 && enable_print == 1)
       {
         pfprintf(f, 2, "t%d <= t%d - t%d;\n", count+1, count, count-1);   
       }      
@@ -389,7 +389,7 @@ static int emit_code(FILE *f, Node *node)
       {
         pfprintf(f, 2, "t%d <= sub t%d, t%d;\n", count+1, count-1, count);   
       }
-      else if (enable_ansic == 1 && enable_print == 1)
+      else if (enable_cany == 1 && enable_print == 1)
       {
         pfprintf(f, 2, "t%d <= t%d - t%d;\n", count+1, count-1, count);   
       }      
@@ -519,24 +519,105 @@ void emit_kmul_nac(FILE *f, int m, int s, unsigned int W)
   pfprintf(f, 0, "}\n");   
 }
 
-/* emit_kmul_ansic:
- * Emit the ANSI C implementation of unsigned/signed multiplication by constant.
+/* set_data_width:
+ * For a given data width, set the effective data width for the corresponding integer 
+ * C data type.
+ */
+unsigned int set_data_width(unsigned int W)
+{
+  unsigned int effective_width = 0;
+
+  if (W > 0 && W <= 8)
+  {
+    effective_width = 8;
+  }
+  else if (W > 8 && W <= 16)
+  {
+    effective_width = 16;
+  }
+  else if (W > 16 && W <= 32)
+  {
+    effective_width = 32;
+  }
+  else if (W > 32 && W <= 64)
+  {
+    effective_width = 64;
+  }
+  else
+  {
+    fprintf(stderr, "Error: Data widths higher than 64 bits are not supported.\n");
+    exit (1);
+  }
+
+  return (effective_width);
+}
+
+/* get_c_type:
+ * For the given signedness (s) and data width (W) return the corresponding 
+ * C data type for either ANSI C or C99.
  */                       
-void emit_kmul_ansic(FILE *f, int m, int s, unsigned int W)
+char *get_c_type(int s, unsigned int W)
+{
+  char *c_type_str = malloc((strlen("unsigned long long int")+1) * sizeof(char));
+  int offset = 0;
+
+  if (enable_c99 == 1)
+  {
+    if (s == 0)
+    {
+      strcpy(c_type_str, "u");
+      offset = 1;
+    }
+    sprintf(c_type_str+offset, "int%u_t", set_data_width(W));
+  }
+  else if (enable_ansic == 1)
+  {
+    if (s == 0)
+    {
+      strcpy(c_type_str, "unsigned ");
+    }
+    if (set_data_width(W) == 8)
+    {
+      strcat(c_type_str, "char");
+    } 
+    else if (set_data_width(W) == 16)
+    { 
+      strcat(c_type_str, "short");
+    }
+    else if (set_data_width(W) == 32)
+    {
+      strcat(c_type_str, "long");
+    }
+    else if (set_data_width(W) == 64)
+    {
+      strcat(c_type_str, "long long");
+    }
+    else
+    {
+      fprintf(stderr, "Error: Data widths higher than 64 bits are not supported.\n");
+      exit (1);
+    }
+  }
+
+  return (c_type_str);
+}
+
+/* emit_kmul_cany:
+ * Emit the ANSI C or C99 implementation of unsigned/signed multiplication by 
+ * constant.
+ */                       
+void emit_kmul_cany(FILE *f, int m, int s, unsigned int W)
 {
   int i;  
   char c = ((s) ? 's' : 'u');
   char *dt;
-  
-  dt = malloc(24 * sizeof(char));
-  if (c == 's')
+
+  if (enable_c99 == 1)
   {
-    strcpy(dt, "signed int");
+    pfprintf(f, 0, "#include <stdint.h>\n");
   }
-  else if (c == 'u')
-  {
-    strcpy(dt, "unsigned int");
-  }  
+  
+  dt = get_c_type(s, W);  
  
   pfprintf(f, 0, "%s kmul_%c%d_%c_%d (%s x)\n", dt, c, W, ((m > 0) ? 'p' : 'm'), ABS(m), dt);
   pfprintf(f, 0, "{\n");   
@@ -579,6 +660,8 @@ void emit_kmul_ansic(FILE *f, int m, int s, unsigned int W)
   }
   pfprintf(f, 2, "return (y);\n");
   pfprintf(f, 0, "}\n");   
+
+  free(dt);
 }
 
 /* print_usage:
@@ -608,7 +691,9 @@ static void print_usage()
   printf("*   -nac:\n");
   printf("*         Emit software routine in the NAC general assembly language (default).\n");
   printf("*   -ansic:\n");
-  printf("*         Emit software routine in ANSI C (only for width=32).\n");
+  printf("*         Emit software routine in ANSI C (for widths up to 64 bits).\n");
+  printf("*   -c99:\n");
+  printf("*         Emit software routine in C99 (for widths up to 64 bits).\n");
   printf("* \n");
   printf("* For further information, please refer to the website:\n");
   printf("* http://www.nkavvadias.com\n");
@@ -653,11 +738,19 @@ int main(int argc, char *argv[])
     {
       enable_nac   = 1;
       enable_ansic = 0;
+      enable_c99   = 0;
     }
     else if (strcmp("-ansic", argv[i]) == 0)
     {
       enable_nac   = 0;
       enable_ansic = 1;
+      enable_c99   = 0;
+    }
+    else if (strcmp("-c99", argv[i]) == 0)
+    {
+      enable_nac   = 0;
+      enable_ansic = 0;
+      enable_c99   = 1;
     }
     else if (strcmp("-mul",argv[i]) == 0)
     {
@@ -698,12 +791,15 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
+  /* Any C standard enabled */
+  enable_cany = enable_ansic || enable_c99;
+
   fout_name = malloc(25 * sizeof(char));
   if (enable_nac == 1)
   {
     strcpy(suffix, "nac");
   }
-  else if (enable_ansic == 1)
+  else if (enable_cany == 1)
   {
     strcpy(suffix, "c");
   }
@@ -723,9 +819,9 @@ int main(int argc, char *argv[])
   {
     emit_kmul_nac(fout, multiplier_val, is_signed, width_val);
   }
-  else if (enable_ansic == 1)
+  else if (enable_cany == 1)
   {
-    emit_kmul_ansic(fout, multiplier_val, is_signed, width_val);
+    emit_kmul_cany(fout, multiplier_val, is_signed, width_val);
   }
 
   free(fout_name);

@@ -1,25 +1,26 @@
 // test.opt.c
 #include <stdio.h>
 #include <stdlib.h>
-signed int kmul_s32_p_23 (signed int x)
+
+long kmul_s32_p_23 (long x)
 {
-  signed int t0;
-  signed int t1;
-  signed int t2;
-  signed int t3;
-  signed int t4;
-  signed int t5;
-  signed int t6;
-  signed int t7;
-  signed int t8;
-  signed int t9;
-  signed int t10;
-  signed int t11;
-  signed int t12;
-  signed int t13;
-  signed int t14;
-  signed int t15;
-  signed int y;
+  long t0;
+  long t1;
+  long t2;
+  long t3;
+  long t4;
+  long t5;
+  long t6;
+  long t7;
+  long t8;
+  long t9;
+  long t10;
+  long t11;
+  long t12;
+  long t13;
+  long t14;
+  long t15;
+  long y;
   t0 = x;
   t1 = t0 << 1;
   t2 = t1 + x;
@@ -29,7 +30,8 @@ signed int kmul_s32_p_23 (signed int x)
   return (y);
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) 
+{
   int a, b;
   a = atoi(argv[1]);
   b = kmul_s32_p_23(a);
