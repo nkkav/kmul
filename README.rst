@@ -25,8 +25,8 @@
 +-------------------+----------------------------------------------------------+
 |        **v0.1.3** | 2016-07-29                                               |
 |                   |                                                          |
-|                   | Add support for C99 data types, fix support for ANSI C   |
-|                   | ones.                                                    |
+|                   | Add support for C99, GNU89 data types, fix support for   |
+|                   | ANSI C ones.                                             |
 +-------------------+----------------------------------------------------------+
 |        **v0.1.2** | 2016-04-12                                               |
 |                   |                                                          |
@@ -186,7 +186,11 @@ The complete ``kmul`` options listing:
   Emit software routine in the NAC general assembly language (default).
   
 **-ansic**
-  Emit software routine in ANSI C (for widths up to 64 bits).
+  Emit software routine in ANSI C (for widths up to 32 bits).
+
+**-gnu89**
+  Emit software routine in ANSI C with GNU extensions (for widths 
+  up to 64 bits).
 
 **-c99**
   Emit software routine in C99 (for widths up to 64 bits).

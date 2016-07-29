@@ -86,7 +86,7 @@ static Node *find_sequence(int c, double limit);
 int multiplier_val=1, width_val=32, lo_val=0, hi_val=65535;
 int enable_debug=0, enable_errors=0;
 int is_signed=0;
-int enable_nac=1, enable_ansic=0, enable_c99=0, enable_cany=0, enable_print=0;
+int enable_nac=1, enable_ansic=0, enable_gnu89=0, enable_c99=0, enable_cany=0, enable_print=0;
 FILE *fout;
 
 // Variable definitions <7b>, ...
@@ -539,13 +539,13 @@ unsigned int set_data_width(unsigned int W)
   {
     effective_width = 32;
   }
-  else if (W > 32 && W <= 64)
+  else if ((W > 32 && W <= 64) && !enable_ansic)
   {
     effective_width = 64;
   }
-  else
+  if ((W > 32 && enable_ansic == 1) || (W > 64))
   {
-    fprintf(stderr, "Error: Data widths higher than 64 bits are not supported.\n");
+    fprintf(stderr, "Error: Data widths higher than %d bits are not supported.\n", (enable_ansic ? 32 : 64));
     exit (1);
   }
 
@@ -554,7 +554,7 @@ unsigned int set_data_width(unsigned int W)
 
 /* get_c_type:
  * For the given signedness (s) and data width (W) return the corresponding 
- * C data type for either ANSI C or C99.
+ * C data type for either ANSI C, GNU89 (ANSI C with GNU extensions) or C99.
  */                       
 char *get_c_type(int s, unsigned int W)
 {
@@ -570,7 +570,7 @@ char *get_c_type(int s, unsigned int W)
     }
     sprintf(c_type_str+offset, "int%u_t", set_data_width(W));
   }
-  else if (enable_ansic == 1)
+  else if (enable_ansic == 1 || enable_gnu89 == 1)
   {
     if (s == 0)
     {
@@ -588,22 +588,22 @@ char *get_c_type(int s, unsigned int W)
     {
       strcat(c_type_str, "long");
     }
-    else if (set_data_width(W) == 64)
-    {
-      strcat(c_type_str, "long long");
-    }
-    else
-    {
-      fprintf(stderr, "Error: Data widths higher than 64 bits are not supported.\n");
-      exit (1);
-    }
+  }
+  if (set_data_width(W) == 64 && enable_gnu89 == 1)
+  {
+    strcat(c_type_str, "long long");
+  }
+  if ((W > 32 && enable_ansic == 1) || (W > 64))
+  {
+    fprintf(stderr, "Error: Data widths higher than %d bits are not supported.\n", (enable_ansic ? 32 : 64));
+    exit (1);
   }
 
   return (c_type_str);
 }
 
 /* emit_kmul_cany:
- * Emit the ANSI C or C99 implementation of unsigned/signed multiplication by 
+ * Emit the ANSI C, GNU89 or C99 implementation of unsigned/signed multiplication by 
  * constant.
  */                       
 void emit_kmul_cany(FILE *f, int m, int s, unsigned int W)
@@ -691,7 +691,10 @@ static void print_usage()
   printf("*   -nac:\n");
   printf("*         Emit software routine in the NAC general assembly language (default).\n");
   printf("*   -ansic:\n");
-  printf("*         Emit software routine in ANSI C (for widths up to 64 bits).\n");
+  printf("*         Emit software routine in ANSI C (for widths up to 32 bits).\n");
+  printf("*   -gnu89:\n");
+  printf("*         Emit software routine in ANSI C with GNU extensions (for widths\n");
+  printf("*         up to 64 bits).\n");
   printf("*   -c99:\n");
   printf("*         Emit software routine in C99 (for widths up to 64 bits).\n");
   printf("* \n");
@@ -744,12 +747,21 @@ int main(int argc, char *argv[])
     {
       enable_nac   = 0;
       enable_ansic = 1;
+      enable_gnu89 = 0;
+      enable_c99   = 0;
+    }
+    else if (strcmp("-gnu89", argv[i]) == 0)
+    {
+      enable_nac   = 0;
+      enable_ansic = 0;
+      enable_gnu89 = 1;
       enable_c99   = 0;
     }
     else if (strcmp("-c99", argv[i]) == 0)
     {
       enable_nac   = 0;
       enable_ansic = 0;
+      enable_gnu89 = 0;
       enable_c99   = 1;
     }
     else if (strcmp("-mul",argv[i]) == 0)
@@ -792,7 +804,7 @@ int main(int argc, char *argv[])
   }
 
   /* Any C standard enabled */
-  enable_cany = enable_ansic || enable_c99;
+  enable_cany = enable_ansic || enable_gnu89 || enable_c99;
 
   fout_name = malloc(25 * sizeof(char));
   if (enable_nac == 1)
