@@ -173,7 +173,7 @@ static Node *lookup(int c)
     // Create and initialize node <8b>
     node = (Node *) malloc(sizeof(Node));
     node->value = c;
-    //node->parent = NULL;
+    node->parent = NULL;
 
     node->next = hash_table[hash];
     hash_table[hash] = node;
@@ -578,16 +578,22 @@ char *get_c_type(int s, unsigned int W)
     }
     if (set_data_width(W) == 8)
     {
-      strcat(c_type_str, "char");
+      strcpy(c_type_str, "char");
     } 
     else if (set_data_width(W) == 16)
     { 
-      strcat(c_type_str, "short");
+      strcpy(c_type_str, "short");
     }
     else if (set_data_width(W) == 32)
     {
-      strcat(c_type_str, "long");
+      strcpy(c_type_str, "long");
     }
+  }
+  else
+  {
+    strncpy(c_type_str, "UNSUPPORTED", sizeof("UNSUPPORTED")+1);
+    fprintf(stderr, "Error: Unsupported C data type in get_c_type(). Exiting...\n");
+    exit (1);
   }
   if (set_data_width(W) == 64 && enable_gnu89 == 1)
   {
@@ -610,7 +616,7 @@ void emit_kmul_cany(FILE *f, int m, int s, unsigned int W)
 {
   int i;  
   char c = ((s) ? 's' : 'u');
-  char *dt;
+  char *dt = NULL;
 
   if (enable_c99 == 1)
   {
