@@ -34,8 +34,8 @@
 #include <stdarg.h>
 
 /* dprintf: debugging printf enable by "enable" flag. */
-#define dprintf(enable, debug_f, args...) \
-if (enable==1) fprintf(debug_f, args);
+#define dprintf(enable, debug_f, ...) \
+if (enable==1) fprintf(debug_f, __VA_ARGS__);
 #define _d_(arg) arg
 
 // Function definitions <3c>, ...
