@@ -268,7 +268,7 @@ static void emit_shift(FILE *f, int target, int source)
     i++;
   } while (target != temp);
 
-  dprintf(enable_debug, stdout, "Info: %d = %d << %d\n", target, source, i);
+  dprintf(enable_debug, stdout, "Info: %d = %d << %u\n", target, source, i);
   if (enable_nac == 1 && enable_print == 1)
   {
     pfprintf(f, 2, "t%d <= shl t%d, %d;\n", count+1, count, i);   
