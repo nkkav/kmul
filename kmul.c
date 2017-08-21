@@ -400,7 +400,7 @@ static int emit_code(FILE *f, Node *node)
 }
 
 // Function definitions <15c>
-static double estimate_cost(int c)
+static double estimate_cost(/*int c*/)
 {
   // Multiplication cost for the multiplier unit
   return (MULT_COST);
@@ -409,7 +409,7 @@ static double estimate_cost(int c)
 // Function definitions <15d>
 void multiply(int target)
 {
-  double multiply_cost = estimate_cost(target);
+  double multiply_cost = estimate_cost(/*target*/);
 
   // Handle the (straightforward) odd case <16a>
   if (IS_ODD(target))
