@@ -84,9 +84,9 @@ static Node *find_sequence(int c, double limit);
 // ---------------------------- end cut --------------------------------
 
 int multiplier_val=1, width_val=32, lo_val=0, hi_val=65535;
-int enable_debug=0, enable_errors=0;
+int enable_debug=0;
 int is_signed=0;
-int enable_nac=1, enable_ansic=0, enable_gnu89=0, enable_c99=0, enable_cany=0, enable_print=0;
+int enable_nac=1, enable_ansic=0, enable_gnu89=0, enable_c99=0, enable_cany=0;
 FILE *fout;
 
 // Variable definitions <7b>, ...
@@ -140,9 +140,6 @@ void init_costs_for_mult_const_optimization()
   costs[5] = SHIFT_COST + ADD_COST;    /* for FACTORADD */
   costs[6] = SHIFT_COST + SUB_COST;    /* for FACTORSUB */
   costs[7] = SHIFT_COST + SUB_COST;    /* for FACTORREV */
-//  costs[5] = 99999;                    /* for FACTORADD */
-//  costs[6] = 99999;                    /* for FACTORSUB */
-//  costs[7] = 99999;                    /* for FACTORREV */
 }
 
 // Function definitions <3d>
@@ -269,11 +266,11 @@ static void emit_shift(FILE *f, int target, int source)
   } while (target != temp);
 
   dprintf(enable_debug, stdout, "Info: %d = %d << %u\n", target, source, i);
-  if (enable_nac == 1 && enable_print == 1)
+  if (enable_nac == 1)
   {
     pfprintf(f, 2, "t%d <= shl t%d, %d;\n", count+1, count, i);   
   }
-  else if (enable_cany == 1 && enable_print == 1)
+  else if (enable_cany == 1)
   {
     pfprintf(f, 2, "t%d = t%d << %d;\n", count+1, count, i);   
   }      
@@ -294,11 +291,11 @@ static int emit_code(FILE *f, Node *node)
     case NEGATE:
       source = emit_code(f, node->parent);
       dprintf(enable_debug, stdout, "Info: %d = 0 - %d\n", target, source);
-      if (enable_nac == 1 && enable_print == 1)
+      if (enable_nac == 1)
       {
         pfprintf(f, 2, "t%d <= neg t%d;\n", count+1, count);   
       }
-      else if (enable_cany == 1 && enable_print == 1)
+      else if (enable_cany == 1)
       {
         pfprintf(f, 2, "t%d = -t%d;\n", count+1, count);   
       }
@@ -309,11 +306,11 @@ static int emit_code(FILE *f, Node *node)
       source = emit_code(f, node->parent);
       emit_shift(f, target-1, source);
       dprintf(enable_debug, stdout, "Info: %d = %d + 1\n", target, target-1);
-      if (enable_nac == 1 && enable_print == 1)
+      if (enable_nac == 1)
       {
         pfprintf(f, 2, "t%d <= add t%d, x;\n", count+1, count);   
       }
-      else if (enable_cany == 1 && enable_print == 1)
+      else if (enable_cany == 1)
       {
         pfprintf(f, 2, "t%d = t%d + x;\n", count+1, count);   
       }      
@@ -324,11 +321,11 @@ static int emit_code(FILE *f, Node *node)
       source = emit_code(f, node->parent);
       emit_shift(f, target+1, source);
       dprintf(enable_debug, stdout, "Info: %d = %d - 1\n", target, target+1);
-      if (enable_nac == 1 && enable_print == 1)
+      if (enable_nac == 1)
       {
         pfprintf(f, 2, "t%d <= sub t%d, x;\n", count+1, count);   
       }
-      else if (enable_cany == 1 && enable_print == 1)
+      else if (enable_cany == 1)
       {
         pfprintf(f, 2, "t%d = t%d - x;\n", count+1, count);   
       }      
@@ -339,11 +336,11 @@ static int emit_code(FILE *f, Node *node)
       source = emit_code(f, node->parent);
       emit_shift(f, 1-target, source);
       dprintf(enable_debug, stdout, "Info: %d = 1 - %d\n", target, 1-target);
-      if (enable_nac == 1 && enable_print == 1)
+      if (enable_nac == 1)
       {
         pfprintf(f, 2, "t%d <= sub x, t%d;\n", count+1, count);   
       }
-      else if (enable_cany == 1 && enable_print == 1)
+      else if (enable_cany == 1)
       {
         pfprintf(f, 2, "t%d = x - t%d;\n", count+1, count);   
       }      
@@ -354,11 +351,11 @@ static int emit_code(FILE *f, Node *node)
       source = emit_code(f, node->parent);
       emit_shift(f, target-source, source);
       dprintf(enable_debug, stdout, "Info: %d = %d + %d\n", target, target-source, source);
-      if (enable_nac == 1 && enable_print == 1)
+      if (enable_nac == 1)
       {
         pfprintf(f, 2, "t%d <= add t%d, t%d;\n", count+1, count, count-1);   
       }
-      else if (enable_cany == 1 && enable_print == 1)
+      else if (enable_cany == 1)
       {
         pfprintf(f, 2, "t%d <= t%d + t%d;\n", count+1, count, count-1);   
       }      
@@ -369,11 +366,11 @@ static int emit_code(FILE *f, Node *node)
       source = emit_code(f, node->parent);
       emit_shift(f, target+source, source);
       dprintf(enable_debug, stdout, "Info: %d = %d - %d\n", target, target+source, source);
-      if (enable_nac == 1 && enable_print == 1)
+      if (enable_nac == 1)
       {
         pfprintf(f, 2, "t%d <= sub t%d, t%d;\n", count+1, count, count-1);   
       }
-      else if (enable_cany == 1 && enable_print == 1)
+      else if (enable_cany == 1)
       {
         pfprintf(f, 2, "t%d <= t%d - t%d;\n", count+1, count, count-1);   
       }      
@@ -385,11 +382,11 @@ static int emit_code(FILE *f, Node *node)
       emit_shift(f, source-target, source);
       dprintf(enable_debug, stdout, "Info: %d = %d - %d\n", target, source, source-target);
       // FIXME: ??? Needs testing.
-      if (enable_nac == 1 && enable_print == 1)
+      if (enable_nac == 1)
       {
         pfprintf(f, 2, "t%d <= sub t%d, t%d;\n", count+1, count-1, count);   
       }
-      else if (enable_cany == 1 && enable_print == 1)
+      else if (enable_cany == 1)
       {
         pfprintf(f, 2, "t%d <= t%d - t%d;\n", count+1, count-1, count);   
       }      
@@ -492,7 +489,6 @@ void emit_kmul_nac(FILE *f, int m, int s, unsigned int W)
   }
   pfprintf(f, 0, "S_1:\n");
   
-  enable_print = 1;
   count = 0;
   // Apply constant multiplication optimization.
   if (m == 0)
@@ -640,7 +636,6 @@ void emit_kmul_cany(FILE *f, int m, int s, unsigned int W)
   }
   pfprintf(f, 2, "%s y;\n", dt);   
  
-  enable_print = 1;
   count = 0;
   // Apply constant multiplication optimization.
   if (m == 0)
