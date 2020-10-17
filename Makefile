@@ -14,5 +14,4 @@ tidy:
 	rm -f *.o
 
 clean:
-	rm -f *.o kmul$(EXE) kmul_*.nac kmul_u*.c kmul_s*.c
-
+	rm -f *.o kmul$(EXE) kmul_*.nac kmul_*.c

@@ -9,7 +9,7 @@
  *              July 13, 1994
  * Author     : Nikolaos Kavvadias <nikolaos.kavvadias@gmail.com>                
  * Copyright  : (C) Nikolaos Kavvadias 2006, 2007, 2008, 2009, 2010, 2011, 2012, 
- *              2013, 2014, 2015, 2016, 2017                
+ *              2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020
  * Website    : http://www.nkavvadias.com                            
  *                                                                          
  * This file is part of kmul, and is distributed under the terms of the  
@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <assert.h>
 
 /* dprintf: debugging printf enable by "enable" flag. */
 #define dprintf(enable, debug_f, ...) \
@@ -49,6 +50,13 @@ if (enable==1) fprintf(debug_f, __VA_ARGS__);
 #define HASH_SIZE 2047
 // Maximum constant multiplication steps
 #define MAX_STEPS   16
+
+// Constant multiplication algorithm to use
+typedef enum
+{
+  BINARY_DECOMPOSITION, /* just use binary decomposition */
+  BERNSTEIN_BRIGGS      /* the Bernstein-Briggs dynamic programming algorithm */
+} ConstMulAlg;
 
 // ------------------------------ cut ----------------------------------
 // Type definitions <7a>, ...
@@ -102,8 +110,7 @@ double const_mul_cost = 0.0;
 int count = 0, kmul_steps = 0;
 
 
-/* print_spaces:
- * Print a configurable number of space characters to an output file (specified 
+/* Print a configurable number of space characters to an output file (specified
  * by the given filename; the file is assumed already opened).
  */
 void print_spaces(FILE *f, int nspaces)
@@ -115,8 +122,7 @@ void print_spaces(FILE *f, int nspaces)
   }
 }
 
-/* pfprintf: 
- * fprintf prefixed by a number of space characters. 
+/* fprintf prefixed by a number of space characters.
  */
 void pfprintf(FILE *f, int nspaces, char *fmt, ...)
 {
@@ -127,7 +133,7 @@ void pfprintf(FILE *f, int nspaces, char *fmt, ...)
   va_end(args);
 }
 
-/* init_costs_for_mult_const_optimization:
+/* Initialize costs for the Bernstein-Briggs algorithm
  */
 void init_costs_for_mult_const_optimization()
 {
@@ -403,6 +409,48 @@ static double estimate_cost(/*int c*/)
   return (MULT_COST);
 }
 
+/* The simplest possible algorithm using binary decomposition
+ */
+void binary_decomposition(FILE *f, int target) {
+  int x = target;
+  int mul = 0;
+  int x_abs = (x > 0) ? x : -x;
+
+  while (x_abs > 0) {
+    unsigned bit = x_abs & 1;
+    if (bit) {
+      if (enable_nac == 1)
+      {
+        pfprintf(f, 2, "t%d <= shl x, %d;\n", count, mul);
+        if (count > 0) {
+          pfprintf(f, 2, "t%d <= add t%d, t%d;\n", count, count, count-1);
+        }
+      }
+      else if (enable_cany == 1)
+      {
+        pfprintf(f, 2, "t%d = x << %d;\n", count, mul);
+        if (count > 0) {
+          pfprintf(f, 2, "t%d = t%d + t%d;\n", count, count, count-1);
+        }
+      }
+      count++;
+    }
+    x_abs >>= 1;
+    mul++;
+  }
+  if (x < 0)
+  {
+    if (enable_nac == 1)
+    {
+      pfprintf(f, 2, "t%d <= neg t%d;\n", count, count-1);
+    }
+    else if (enable_cany == 1)
+    {
+      pfprintf(f, 2, "t%d = -t%d;\n", count, count-1);
+    }
+  }
+}
+
 // Function definitions <15d>
 void multiply(int target)
 {
@@ -447,7 +495,6 @@ void init_multiply(void)
   Node *node, *node1;
   unsigned int i;
   
-//  dprintf(enable_debug, stdout, "Info: Initializing for constant multiplication evaluation.\n");
   for (i = 0; i < HASH_SIZE; i++)
   {
     hash_table[i] = NULL;
@@ -463,18 +510,18 @@ void init_multiply(void)
   node->cost = NEG_COST;
 }
 
-/* emit_kmul_nac:
- * Emit the NAC (generic assembly language) implementation of unsigned/signed
+/* Emit the NAC (generic assembly language) implementation of unsigned/signed
  * multiplication by constant. Calls "multiply" which in turn recursively calls
  * "emit_code".
  */
-void emit_kmul_nac(FILE *f, int m, int s, unsigned int W)
+void emit_kmul_nac(FILE *f, ConstMulAlg alg, int m, int s, unsigned int W)
 { 
-  int i;  
   char c = ((s) ? 's' : 'u');
+  int steps = (alg == BINARY_DECOMPOSITION) ? width_val : MAX_STEPS;
+  char a = (alg == BINARY_DECOMPOSITION) ? 'b' : 'o';
    
-  pfprintf(f, 0, "procedure kmul_%c%d_%c_%d (in %c%d x, out %c%d y)\n", 
-      c, W, ((m > 0) ? 'p' : 'm'), ABS(m), c, W, c, W);
+  pfprintf(f, 0, "procedure kmul_%c_%c%d_%c_%d (in %c%d x, out %c%d y)\n",
+      a, c, W, ((m > 0) ? 'p' : 'm'), ABS(m), c, W, c, W);
   pfprintf(f, 0, "{\n");   
   if (m == 0)
   {
@@ -482,7 +529,7 @@ void emit_kmul_nac(FILE *f, int m, int s, unsigned int W)
   }
   else
   {
-    for (i = 0; i < MAX_STEPS; i++)
+    for (int i = 0; i < steps; i++)
     {
       pfprintf(f, 2, "localvar %c%d t%d;\n", c, W, i);   
     }
@@ -497,11 +544,19 @@ void emit_kmul_nac(FILE *f, int m, int s, unsigned int W)
   }
   else
   {
-    pfprintf(f, 2, "t%d <= mov x;\n", count);
+    if (alg == BERNSTEIN_BRIGGS)
+    {
+      pfprintf(f, 2, "t%d <= mov x;\n", count);
+    }
     if (m != 0)
     {
-      init_multiply();
-      multiply((int)m);  
+      if (alg == BINARY_DECOMPOSITION) {
+        binary_decomposition(f, (int)m);
+      } else {
+        assert(alg == BERNSTEIN_BRIGGS);
+        init_multiply();
+        multiply((int)m);
+      }
     }
   }
   if (m == 0)
@@ -510,13 +565,13 @@ void emit_kmul_nac(FILE *f, int m, int s, unsigned int W)
   }
   else
   {
-    pfprintf(f, 2, "y <= mov t%d;\n", count);
+    int last = (alg == BINARY_DECOMPOSITION && m > 0) ? count-1 : count;
+    pfprintf(f, 2, "y <= mov t%d;\n", last);
   }
   pfprintf(f, 0, "}\n");   
 }
 
-/* set_data_width:
- * For a given data width, set the effective data width for the corresponding integer 
+/* For a given data width, set the effective data width for the corresponding integer
  * C data type.
  */
 unsigned int set_data_width(unsigned int W)
@@ -542,23 +597,22 @@ unsigned int set_data_width(unsigned int W)
   if ((W > 32 && enable_ansic == 1) || (W > 64))
   {
     fprintf(stderr, "Error: Data widths higher than %d bits are not supported.\n", (enable_ansic ? 32 : 64));
-    exit (1);
+    exit(EXIT_FAILURE);
   }
 
   return (effective_width);
 }
 
-/* get_c_type:
- * For the given signedness (s) and data width (W) return the corresponding 
+/* For the given signedness (s) and data width (W) return the corresponding 
  * C data type for either ANSI C, GNU89 (ANSI C with GNU extensions) or C99.
  */                       
 char *get_c_type(int s, unsigned int W)
 {
   char *c_type_str = malloc((strlen("unsigned long long int")+1) * sizeof(char));
-  int offset = 0;
 
   if (enable_c99 == 1)
   {
+    int offset = 0;
     if (s == 0)
     {
       strcpy(c_type_str, "u");
@@ -589,7 +643,7 @@ char *get_c_type(int s, unsigned int W)
   {
     strncpy(c_type_str, "UNSUPPORTED", sizeof("UNSUPPORTED")+1);
     fprintf(stderr, "Error: Unsupported C data type in get_c_type(). Exiting...\n");
-    exit (1);
+    exit(EXIT_FAILURE);
   }
   if (set_data_width(W) == 64 && enable_gnu89 == 1)
   {
@@ -598,21 +652,21 @@ char *get_c_type(int s, unsigned int W)
   if ((W > 32 && enable_ansic == 1) || (W > 64))
   {
     fprintf(stderr, "Error: Data widths higher than %d bits are not supported.\n", (enable_ansic ? 32 : 64));
-    exit (1);
+    exit(EXIT_FAILURE);
   }
 
   return (c_type_str);
 }
 
-/* emit_kmul_cany:
- * Emit the ANSI C, GNU89 or C99 implementation of unsigned/signed multiplication by 
+/* Emit the ANSI C, GNU89 or C99 implementation of unsigned/signed multiplication by
  * constant.
  */                       
-void emit_kmul_cany(FILE *f, int m, int s, unsigned int W)
+void emit_kmul_cany(FILE *f, ConstMulAlg alg, int m, int s, unsigned int W)
 {
-  int i;  
   char c = ((s) ? 's' : 'u');
   char *dt = NULL;
+  int steps = (alg == BINARY_DECOMPOSITION) ? width_val : MAX_STEPS;
+  char a = (alg == BINARY_DECOMPOSITION) ? 'b' : 'o';
 
   if (enable_c99 == 1)
   {
@@ -621,7 +675,7 @@ void emit_kmul_cany(FILE *f, int m, int s, unsigned int W)
   
   dt = get_c_type(s, W);  
  
-  pfprintf(f, 0, "%s kmul_%c%d_%c_%d (%s x)\n", dt, c, W, ((m > 0) ? 'p' : 'm'), ABS(m), dt);
+  pfprintf(f, 0, "%s kmul_%c_%c%d_%c_%d (%s x)\n", dt, a, c, W, ((m > 0) ? 'p' : 'm'), ABS(m), dt);
   pfprintf(f, 0, "{\n");   
   if (m == 0)
   {
@@ -629,7 +683,7 @@ void emit_kmul_cany(FILE *f, int m, int s, unsigned int W)
   }
   else
   {
-    for (i = 0; i < MAX_STEPS; i++)
+    for (int i = 0; i < steps; i++)
     {
       pfprintf(f, 2, "%s t%d;\n", dt, i);   
     }
@@ -644,11 +698,19 @@ void emit_kmul_cany(FILE *f, int m, int s, unsigned int W)
   }
   else
   {
-    pfprintf(f, 2, "t%d = x;\n", count);
+    if (alg == BERNSTEIN_BRIGGS)
+    {
+      pfprintf(f, 2, "t%d = x;\n", count);
+    }
     if (m != 0)
     {
-      init_multiply();
-      multiply((int)m);  
+      if (alg == BINARY_DECOMPOSITION) {
+        binary_decomposition(f, (int)m);
+      } else {
+        assert(alg == BERNSTEIN_BRIGGS);
+        init_multiply();
+        multiply((int)m);
+      }
     }
   }
   if (m == 0)
@@ -657,7 +719,8 @@ void emit_kmul_cany(FILE *f, int m, int s, unsigned int W)
   }
   else
   {
-    pfprintf(f, 2, "y = t%d;\n", count);
+    int last = (alg == BINARY_DECOMPOSITION && m > 0) ? count-1 : count;
+    pfprintf(f, 2, "y = t%d;\n", last);
   }
   pfprintf(f, 2, "return (y);\n");
   pfprintf(f, 0, "}\n");   
@@ -665,8 +728,7 @@ void emit_kmul_cany(FILE *f, int m, int s, unsigned int W)
   free(dt);
 }
 
-/* print_usage:
- * Print usage instructions for the "kmul" program.
+/* Print usage instructions for the "kmul" program.
  */
 static void print_usage()
 {
@@ -680,6 +742,8 @@ static void print_usage()
   printf("*         Print this help.\n");
   printf("*   -d:\n");
   printf("*         Enable debug/diagnostic output.\n");
+  printf("*   -bindecomp:\n");
+  printf("*         Use binary decomposition instead of the Bernstein-Briggs algorithm.\n");
   printf("*   -mul <num>:\n");
   printf("*         Set the value of the multiplier. Default: 1.\n");
   printf("*   -width <num>:\n");
@@ -703,19 +767,21 @@ static void print_usage()
   printf("* http://www.nkavvadias.com\n");
 }
 
-/* main:
- * Program entry.
+/* Program entry.
  */
 int main(int argc, char *argv[]) 
 {
    int i;
    char *fout_name, suffix[4], ch='X', datatype[8];
+   ConstMulAlg kmul_algorithm = BERNSTEIN_BRIGGS;
+   char a = 'o';
 
    // If no arguments are passed, exit with help
    if (argc == 1)
    {
      print_usage();
-     exit(1);
+     // still a normal execution of the program
+     exit(EXIT_SUCCESS);
    }
   
   // Read input arguments
@@ -724,11 +790,16 @@ int main(int argc, char *argv[])
     if (strcmp("-h", argv[i]) == 0)
     {
       print_usage();
-      exit(1);
+      exit(EXIT_FAILURE);
     }
     else if (strcmp("-d", argv[i]) == 0)
     {
       enable_debug = 1;
+    }
+    else if (strcmp("-bindecomp", argv[i]) == 0)
+    {
+      kmul_algorithm = BINARY_DECOMPOSITION;
+      a = 'b';
     }
     else if (strcmp("-unsigned", argv[i]) == 0)
     {
@@ -793,7 +864,7 @@ int main(int argc, char *argv[])
       if (argv[i][0] != '-')
       {
         print_usage();
-        exit(1);
+        exit(EXIT_FAILURE);
       }
     }
   }
@@ -801,7 +872,7 @@ int main(int argc, char *argv[])
   if ((is_signed == 0) && (multiplier_val < 0))
   {
     fprintf(stderr, "Error: Multiplier must be positive for unsigned multiplication.\n");
-    exit(1);
+    exit(EXIT_FAILURE);
   }
 
   /* Any C standard enabled */
@@ -820,21 +891,21 @@ int main(int argc, char *argv[])
   sprintf(datatype, "%c%d", ch, width_val);
   if (multiplier_val >= 0)
   {
-    sprintf(fout_name, "kmul_%s_p_%d.%s", datatype, multiplier_val, suffix);
+    sprintf(fout_name, "kmul_%c_%s_p_%d.%s", a, datatype, multiplier_val, suffix);
   }
   else
   {
-    sprintf(fout_name, "kmul_%s_m_%d.%s", datatype, ABS(multiplier_val), suffix);
+    sprintf(fout_name, "kmul_%c_%s_m_%d.%s", a, datatype, ABS(multiplier_val), suffix);
   }
   fout = fopen(fout_name, "w");
 
   if (enable_nac == 1)
   {
-    emit_kmul_nac(fout, multiplier_val, is_signed, width_val);
+    emit_kmul_nac(fout, kmul_algorithm, multiplier_val, is_signed, width_val);
   }
   else if (enable_cany == 1)
   {
-    emit_kmul_cany(fout, multiplier_val, is_signed, width_val);
+    emit_kmul_cany(fout, kmul_algorithm, multiplier_val, is_signed, width_val);
   }
 
   free(fout_name);

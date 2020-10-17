@@ -23,18 +23,22 @@ LOLIMIT2=-128
 # Clean the produced files from testing unsigned multiplications
 for ((mulu=0 ; mulu <= ${HILIMIT1} ; mulu++))
 do
-  rm -rf kmul_u32_p_${mulu}.nac 
-  rm -rf kmul_u32_p_${mulu}.c
+  for alg in "o"; do
+    rm -rf kmul_${alg}_u32_p_${mulu}.nac 
+    rm -rf kmul_${alg}_u32_p_${mulu}.c
+  done
 done
 
 # Clean the produced files from testing signed multiplications
 for ((muls=${LOLIMIT2} ; muls <= ${HILIMIT2} ; muls++))
 do
-  abs $muls
-  rm -rf kmul_s32_m_${absval}.nac 
-  rm -rf kmul_s32_m_${absval}.c
-  rm -rf kmul_s32_p_${absval}.nac 
-  rm -rf kmul_s32_p_${absval}.c
+  for alg in "o"; do
+    abs $muls
+    rm -rf kmul_${alg}_s32_m_${absval}.nac
+    rm -rf kmul_${alg}_s32_m_${absval}.c
+    rm -rf kmul_${alg}_s32_p_${absval}.nac 
+    rm -rf kmul_${alg}_s32_p_${absval}.c
+  done
 done
 
 if [ "$SECONDS" -eq 1 ]
@@ -44,4 +48,3 @@ else
   units=seconds
 fi
 echo "This script has been running for $SECONDS $units."
-exit 0

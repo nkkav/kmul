@@ -17,11 +17,15 @@
 +-------------------+----------------------------------------------------------+
 | **Website**       | http://www.nkavvadias.com                                |
 +-------------------+----------------------------------------------------------+
-| **Release Date**  | 29 July 2016                                             |
+| **Release Date**  | 17 October 2020                                          |
 +-------------------+----------------------------------------------------------+
-| **Version**       | 0.1.3                                                    |
+| **Version**       | 0.1.4                                                    |
 +-------------------+----------------------------------------------------------+
 | **Rev. history**  |                                                          |
++-------------------+----------------------------------------------------------+
+|        **v0.1.4** | 2020-10-17                                               |
+|                   |                                                          |
+|                   | Add a binary decomposition algorithm.                    |
 +-------------------+----------------------------------------------------------+
 |        **v0.1.3** | 2016-07-29                                               |
 |                   |                                                          |
@@ -87,8 +91,11 @@ This technical report implements Bernstein's algorithm documented in:
 R. Bernstein, "Multiplication by integer constants," Software - Practice and 
 Experience, Vol. 16, No. 7, pp. 641-652, July 1986.
 
-``kmul`` can also be used for emitting a NAC (generic assembly language) or ANSI 
-C implementation of the multiplication.
+A simpler algorithm based on binary decomposition can also be used for
+comparison.
+
+``kmul`` emits either a NAC (generic assembly language) or an ANSI C/C99
+implementation of the multiplication.
 
 
 2. File listing
@@ -168,7 +175,10 @@ The complete ``kmul`` options listing:
   
 **-d**
   Enable debug/diagnostic output.
-  
+
+**-bindecomp**
+  Use binary decomposition instead of the Bernstein-Briggs algorithm.
+
 **-mul <num>**
   Set the value of the multiplier. Default: 1.
   
