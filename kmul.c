@@ -8,7 +8,7 @@
  *              Tim Harvey     <harv@cs.rice.edu>
  *              July 13, 1994
  * Author     : Nikolaos Kavvadias <nikolaos.kavvadias@gmail.com>                
- * Copyright  : (C) Nikolaos Kavvadias 2006, 2007, 2008, 2009, 2010, 2011, 2012, 
+ * Copyright  : (C) Nikolaos Kavvadias 2006, 2007, 2008, 2009, 2010, 2011, 2012,
  *              2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020
  * Website    : http://www.nkavvadias.com                            
  *                                                                          

@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -std=c99 -pedantic -Wall -Wextra -O3
-EXE= .exe
+EXE = .exe
 
 all: kmul$(EXE)
 

@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-long kmul_s32_p_23 (long x)
+long kmul_o_s32_p_23 (long x)
 {
   long t0;
   long t1;
@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 {
   int a, b;
   a = atoi(argv[1]);
-  b = kmul_s32_p_23(a);
+  b = kmul_o_s32_p_23(a);
   printf("b = %d\n", b);
   return b;
 }

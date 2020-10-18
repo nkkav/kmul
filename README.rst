@@ -11,9 +11,7 @@
 +-------------------+----------------------------------------------------------+
 | **Author**        | Nikolaos Kavvadias                                       |
 +-------------------+----------------------------------------------------------+
-| **Contact**       | nikos@nkavvadias.com                                     |
-|                   |                                                          |
-|                   | nikolaos.kavvadias@gmail.com                             |
+| **Contact**       | nikolaos.kavvadias@gmail.com                             |
 +-------------------+----------------------------------------------------------+
 | **Website**       | http://www.nkavvadias.com                                |
 +-------------------+----------------------------------------------------------+
@@ -149,7 +147,7 @@ Running ``make`` from the command prompt should compile ``kmul``.
 ================
 
 - [mandatory for building] Standard UNIX-based tools (make)
-- gcc (tested with gcc-3.4.4+ on cygwin/x86 gcc-4.6 to gcc-5.3.1 on linux/x64)
+- gcc (tested with gcc-3.4.4+ on cygwin/x86 and gcc-4.6+ on linux/x64)
 - bash
 
 
@@ -270,7 +268,7 @@ routine. The resulting optimized source file should be as follows:
   #include <stdio.h>
   #include <stdlib.h>
 
-  long kmul_s32_p_23 (long x)
+  long kmul_o_s32_p_23 (long x)
   {
     long t0;
     long t1;
@@ -302,7 +300,7 @@ routine. The resulting optimized source file should be as follows:
   {
     int a, b;
     a = atoi(argv[1]);
-    b = kmul_s32_p_23(a);
+    b = kmul_o_s32_p_23(a);
     printf("b = %d\n", b);
     return b;
   }
@@ -312,8 +310,8 @@ This file is compiled and run as follows with one additional argument:
 | ``$ gcc -Wall -O2 -o test.opt.exe test.opt.c``
 | ``$ ./test.opt.exe 155``
  
-The target platform compiler (e.g. ``gcc`` or ``llvm``) is expected to inline the 
-``kmul_s32_p_23`` function at its call site.
+The target platform compiler (e.g., ``gcc`` or ``llvm``) is expected to inline
+the ``kmul_o_s32_p_23`` function at its call site.
 
 
 7. Running tests
