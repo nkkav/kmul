@@ -431,14 +431,22 @@ void binary_decomposition(FILE *f, int target) {
     if (bit) {
       if (cgen == NAC)
       {
-        pfprintf(f, 2, "t%d <= shl x, %d;\n", count, mul);
+        if (mul == 0) {
+          pfprintf(f, 2, "t%d <= mov x;\n", count);
+        } else {
+          pfprintf(f, 2, "t%d <= shl x, %d;\n", count, mul);
+        }
         if (count > 0) {
           pfprintf(f, 2, "t%d <= add t%d, t%d;\n", count, count, count-1);
         }
       }
       else if (enable_cany)
       {
-        pfprintf(f, 2, "t%d = x << %d;\n", count, mul);
+        if (mul == 0) {
+          pfprintf(f, 2, "t%d = x;\n", count);
+        } else {
+          pfprintf(f, 2, "t%d = x << %d;\n", count, mul);
+        }
         if (count > 0) {
           pfprintf(f, 2, "t%d = t%d + t%d;\n", count, count, count-1);
         }
