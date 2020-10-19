@@ -51,6 +51,15 @@ if (enable==1) fprintf(debug_f, __VA_ARGS__);
 // Maximum constant multiplication steps
 #define MAX_STEPS   16
 
+// Code generation mode
+typedef enum
+{
+  NAC,
+  ANSIC,
+  GNU89,
+  C99
+} CodegenMode;
+
 // Constant multiplication algorithm to use
 typedef enum
 {
@@ -94,7 +103,8 @@ static Node *find_sequence(int c, double limit);
 int multiplier_val=1, width_val=32, lo_val=0, hi_val=65535;
 int enable_debug=0;
 int is_signed=0;
-int enable_nac=1, enable_ansic=0, enable_gnu89=0, enable_c99=0, enable_cany=0;
+CodegenMode cgen=NAC;
+int enable_cany=0;
 FILE *fout;
 
 // Variable definitions <7b>, ...
@@ -272,11 +282,11 @@ static void emit_shift(FILE *f, int target, int source)
   } while (target != temp);
 
   dprintf(enable_debug, stdout, "Info: %d = %d << %u\n", target, source, i);
-  if (enable_nac == 1)
+  if (cgen == NAC)
   {
     pfprintf(f, 2, "t%d <= shl t%d, %d;\n", count+1, count, i);   
   }
-  else if (enable_cany == 1)
+  else if (enable_cany)
   {
     pfprintf(f, 2, "t%d = t%d << %d;\n", count+1, count, i);   
   }      
@@ -297,11 +307,11 @@ static int emit_code(FILE *f, Node *node)
     case NEGATE:
       source = emit_code(f, node->parent);
       dprintf(enable_debug, stdout, "Info: %d = 0 - %d\n", target, source);
-      if (enable_nac == 1)
+      if (cgen == NAC)
       {
         pfprintf(f, 2, "t%d <= neg t%d;\n", count+1, count);   
       }
-      else if (enable_cany == 1)
+      else if (enable_cany)
       {
         pfprintf(f, 2, "t%d = -t%d;\n", count+1, count);   
       }
@@ -312,11 +322,11 @@ static int emit_code(FILE *f, Node *node)
       source = emit_code(f, node->parent);
       emit_shift(f, target-1, source);
       dprintf(enable_debug, stdout, "Info: %d = %d + 1\n", target, target-1);
-      if (enable_nac == 1)
+      if (cgen == NAC)
       {
         pfprintf(f, 2, "t%d <= add t%d, x;\n", count+1, count);   
       }
-      else if (enable_cany == 1)
+      else if (enable_cany)
       {
         pfprintf(f, 2, "t%d = t%d + x;\n", count+1, count);   
       }      
@@ -327,11 +337,11 @@ static int emit_code(FILE *f, Node *node)
       source = emit_code(f, node->parent);
       emit_shift(f, target+1, source);
       dprintf(enable_debug, stdout, "Info: %d = %d - 1\n", target, target+1);
-      if (enable_nac == 1)
+      if (cgen == NAC)
       {
         pfprintf(f, 2, "t%d <= sub t%d, x;\n", count+1, count);   
       }
-      else if (enable_cany == 1)
+      else if (enable_cany)
       {
         pfprintf(f, 2, "t%d = t%d - x;\n", count+1, count);   
       }      
@@ -342,11 +352,11 @@ static int emit_code(FILE *f, Node *node)
       source = emit_code(f, node->parent);
       emit_shift(f, 1-target, source);
       dprintf(enable_debug, stdout, "Info: %d = 1 - %d\n", target, 1-target);
-      if (enable_nac == 1)
+      if (cgen == NAC)
       {
         pfprintf(f, 2, "t%d <= sub x, t%d;\n", count+1, count);   
       }
-      else if (enable_cany == 1)
+      else if (enable_cany)
       {
         pfprintf(f, 2, "t%d = x - t%d;\n", count+1, count);   
       }      
@@ -357,11 +367,11 @@ static int emit_code(FILE *f, Node *node)
       source = emit_code(f, node->parent);
       emit_shift(f, target-source, source);
       dprintf(enable_debug, stdout, "Info: %d = %d + %d\n", target, target-source, source);
-      if (enable_nac == 1)
+      if (cgen == NAC)
       {
         pfprintf(f, 2, "t%d <= add t%d, t%d;\n", count+1, count, count-1);   
       }
-      else if (enable_cany == 1)
+      else if (enable_cany)
       {
         pfprintf(f, 2, "t%d <= t%d + t%d;\n", count+1, count, count-1);   
       }      
@@ -372,11 +382,11 @@ static int emit_code(FILE *f, Node *node)
       source = emit_code(f, node->parent);
       emit_shift(f, target+source, source);
       dprintf(enable_debug, stdout, "Info: %d = %d - %d\n", target, target+source, source);
-      if (enable_nac == 1)
+      if (cgen == NAC)
       {
         pfprintf(f, 2, "t%d <= sub t%d, t%d;\n", count+1, count, count-1);   
       }
-      else if (enable_cany == 1)
+      else if (enable_cany)
       {
         pfprintf(f, 2, "t%d <= t%d - t%d;\n", count+1, count, count-1);   
       }      
@@ -388,11 +398,11 @@ static int emit_code(FILE *f, Node *node)
       emit_shift(f, source-target, source);
       dprintf(enable_debug, stdout, "Info: %d = %d - %d\n", target, source, source-target);
       // FIXME: ??? Needs testing.
-      if (enable_nac == 1)
+      if (cgen == NAC)
       {
         pfprintf(f, 2, "t%d <= sub t%d, t%d;\n", count+1, count-1, count);   
       }
-      else if (enable_cany == 1)
+      else if (enable_cany)
       {
         pfprintf(f, 2, "t%d <= t%d - t%d;\n", count+1, count-1, count);   
       }      
@@ -414,19 +424,19 @@ static double estimate_cost(/*int c*/)
 void binary_decomposition(FILE *f, int target) {
   int x = target;
   int mul = 0;
-  int x_abs = (x > 0) ? x : -x;
+  int x_abs = ABS(x);
 
   while (x_abs > 0) {
     unsigned bit = x_abs & 1;
     if (bit) {
-      if (enable_nac == 1)
+      if (cgen == NAC)
       {
         pfprintf(f, 2, "t%d <= shl x, %d;\n", count, mul);
         if (count > 0) {
           pfprintf(f, 2, "t%d <= add t%d, t%d;\n", count, count, count-1);
         }
       }
-      else if (enable_cany == 1)
+      else if (enable_cany)
       {
         pfprintf(f, 2, "t%d = x << %d;\n", count, mul);
         if (count > 0) {
@@ -440,11 +450,11 @@ void binary_decomposition(FILE *f, int target) {
   }
   if (x < 0)
   {
-    if (enable_nac == 1)
+    if (cgen == NAC)
     {
       pfprintf(f, 2, "t%d <= neg t%d;\n", count, count-1);
     }
-    else if (enable_cany == 1)
+    else if (enable_cany)
     {
       pfprintf(f, 2, "t%d = -t%d;\n", count, count-1);
     }
@@ -590,13 +600,13 @@ unsigned int set_data_width(unsigned int W)
   {
     effective_width = 32;
   }
-  else if ((W > 32 && W <= 64) && !enable_ansic)
+  else if ((W > 32 && W <= 64) && cgen != ANSIC)
   {
     effective_width = 64;
   }
-  if ((W > 32 && enable_ansic == 1) || (W > 64))
+  if ((W > 32 && cgen == ANSIC) || (W > 64))
   {
-    fprintf(stderr, "Error: Data widths higher than %d bits are not supported.\n", (enable_ansic ? 32 : 64));
+    fprintf(stderr, "Error: Data widths higher than %d bits are not supported.\n", (cgen == ANSIC ? 32 : 64));
     exit(EXIT_FAILURE);
   }
 
@@ -610,7 +620,7 @@ char *get_c_type(int s, unsigned int W)
 {
   char *c_type_str = malloc((strlen("unsigned long long int")+1) * sizeof(char));
 
-  if (enable_c99 == 1)
+  if (cgen == C99)
   {
     int offset = 0;
     if (s == 0)
@@ -620,7 +630,7 @@ char *get_c_type(int s, unsigned int W)
     }
     sprintf(c_type_str+offset, "int%u_t", set_data_width(W));
   }
-  else if (enable_ansic == 1 || enable_gnu89 == 1)
+  else if (cgen == ANSIC || cgen == GNU89)
   {
     if (s == 0)
     {
@@ -645,13 +655,13 @@ char *get_c_type(int s, unsigned int W)
     fprintf(stderr, "Error: Unsupported C data type in get_c_type(). Exiting...\n");
     exit(EXIT_FAILURE);
   }
-  if (set_data_width(W) == 64 && enable_gnu89 == 1)
+  if (set_data_width(W) == 64 && cgen == GNU89)
   {
     strcat(c_type_str, "long long");
   }
-  if ((W > 32 && enable_ansic == 1) || (W > 64))
+  if ((W > 32 && cgen == ANSIC) || (W > 64))
   {
-    fprintf(stderr, "Error: Data widths higher than %d bits are not supported.\n", (enable_ansic ? 32 : 64));
+    fprintf(stderr, "Error: Data widths higher than %d bits are not supported.\n", (cgen == ANSIC ? 32 : 64));
     exit(EXIT_FAILURE);
   }
 
@@ -668,7 +678,7 @@ void emit_kmul_cany(FILE *f, ConstMulAlg alg, int m, int s, unsigned int W)
   int steps = (alg == BINARY_DECOMPOSITION) ? width_val : MAX_STEPS;
   char a = (alg == BINARY_DECOMPOSITION) ? 'b' : 'o';
 
-  if (enable_c99 == 1)
+  if (cgen == C99)
   {
     pfprintf(f, 0, "#include <stdint.h>\n");
   }
@@ -811,30 +821,19 @@ int main(int argc, char *argv[])
     }
     else if (strcmp("-nac", argv[i]) == 0)
     {
-      enable_nac   = 1;
-      enable_ansic = 0;
-      enable_c99   = 0;
+      cgen = NAC;
     }
     else if (strcmp("-ansic", argv[i]) == 0)
     {
-      enable_nac   = 0;
-      enable_ansic = 1;
-      enable_gnu89 = 0;
-      enable_c99   = 0;
+      cgen = ANSIC;
     }
     else if (strcmp("-gnu89", argv[i]) == 0)
     {
-      enable_nac   = 0;
-      enable_ansic = 0;
-      enable_gnu89 = 1;
-      enable_c99   = 0;
+      cgen = GNU89;
     }
     else if (strcmp("-c99", argv[i]) == 0)
     {
-      enable_nac   = 0;
-      enable_ansic = 0;
-      enable_gnu89 = 0;
-      enable_c99   = 1;
+      cgen = C99;
     }
     else if (strcmp("-mul",argv[i]) == 0)
     {
@@ -876,14 +875,14 @@ int main(int argc, char *argv[])
   }
 
   /* Any C standard enabled */
-  enable_cany = enable_ansic || enable_gnu89 || enable_c99;
+  enable_cany = cgen >= ANSIC && cgen <= C99;
 
   fout_name = malloc(25 * sizeof(char));
-  if (enable_nac == 1)
+  if (cgen == NAC)
   {
     strcpy(suffix, "nac");
   }
-  else if (enable_cany == 1)
+  else if (enable_cany)
   {
     strcpy(suffix, "c");
   }
@@ -899,11 +898,11 @@ int main(int argc, char *argv[])
   }
   fout = fopen(fout_name, "w");
 
-  if (enable_nac == 1)
+  if (cgen == NAC)
   {
     emit_kmul_nac(fout, kmul_algorithm, multiplier_val, is_signed, width_val);
   }
-  else if (enable_cany == 1)
+  else if (enable_cany)
   {
     emit_kmul_cany(fout, kmul_algorithm, multiplier_val, is_signed, width_val);
   }
