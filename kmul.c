@@ -8,8 +8,7 @@
  *              Tim Harvey     <harv@cs.rice.edu>
  *              July 13, 1994
  * Author     : Nikolaos Kavvadias <nikolaos.kavvadias@gmail.com>                
- * Copyright  : (C) Nikolaos Kavvadias 2006, 2007, 2008, 2009, 2010, 2011, 2012,
- *              2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020
+ * Copyright  : (C) Nikolaos Kavvadias 2006-2021
  * Website    : http://www.nkavvadias.com                            
  *                                                                          
  * This file is part of kmul, and is distributed under the terms of the  
@@ -56,7 +55,6 @@ typedef enum
 {
   NAC,
   ANSIC,
-  GNU89,
   C99
 } CodegenMode;
 
@@ -622,7 +620,7 @@ unsigned int set_data_width(unsigned int W)
 }
 
 /* For the given signedness (s) and data width (W) return the corresponding 
- * C data type for either ANSI C, GNU89 (ANSI C with GNU extensions) or C99.
+ * C data type for either ANSI C or C99.
  */                       
 char *get_c_type(int s, unsigned int W)
 {
@@ -638,7 +636,7 @@ char *get_c_type(int s, unsigned int W)
     }
     sprintf(c_type_str+offset, "int%u_t", set_data_width(W));
   }
-  else if (cgen == ANSIC || cgen == GNU89)
+  else if (cgen == ANSIC)
   {
     if (s == 0)
     {
@@ -663,10 +661,6 @@ char *get_c_type(int s, unsigned int W)
     fprintf(stderr, "Error: Unsupported C data type in get_c_type(). Exiting...\n");
     exit(EXIT_FAILURE);
   }
-  if (set_data_width(W) == 64 && cgen == GNU89)
-  {
-    strcat(c_type_str, "long long");
-  }
   if ((W > 32 && cgen == ANSIC) || (W > 64))
   {
     fprintf(stderr, "Error: Data widths higher than %d bits are not supported.\n", (cgen == ANSIC ? 32 : 64));
@@ -676,7 +670,7 @@ char *get_c_type(int s, unsigned int W)
   return (c_type_str);
 }
 
-/* Emit the ANSI C, GNU89 or C99 implementation of unsigned/signed multiplication by
+/* Emit the ANSI C or C99 implementation of unsigned/signed multiplication by
  * constant.
  */                       
 void emit_kmul_cany(FILE *f, ConstMulAlg alg, int m, int s, unsigned int W)
@@ -775,9 +769,6 @@ static void print_usage()
   printf("*         Emit software routine in the NAC general assembly language (default).\n");
   printf("*   -ansic:\n");
   printf("*         Emit software routine in ANSI C (for widths up to 32 bits).\n");
-  printf("*   -gnu89:\n");
-  printf("*         Emit software routine in ANSI C with GNU extensions (for widths\n");
-  printf("*         up to 64 bits).\n");
   printf("*   -c99:\n");
   printf("*         Emit software routine in C99 (for widths up to 64 bits).\n");
   printf("* \n");
@@ -834,10 +825,6 @@ int main(int argc, char *argv[])
     else if (strcmp("-ansic", argv[i]) == 0)
     {
       cgen = ANSIC;
-    }
-    else if (strcmp("-gnu89", argv[i]) == 0)
-    {
-      cgen = GNU89;
     }
     else if (strcmp("-c99", argv[i]) == 0)
     {
